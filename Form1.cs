@@ -836,8 +836,8 @@ namespace DriverLicenseCheck
         // Функция генерация токена
         public static string GenerateToken(int age = 60 * 60 * 24)
         {
-            string user = "user_integration@smartseeds";
-            string password = "x5Da9Et2Fn";
+            string user = "";
+            string password = "";
             var timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             string passwordHash = Convert.ToBase64String(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(password)));
