@@ -1,6 +1,6 @@
 ﻿namespace DriverLicenseCheck
 {
-    partial class Form1
+    partial class InquisitorForm
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InquisitorForm));
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.remainingTimeBox = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
@@ -65,7 +65,7 @@
             this.textBoxEndDate = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.ErrorReceivingDate = new System.Windows.Forms.Label();
-            this.receivingDate = new System.Windows.Forms.TextBox();
+            this.issuedDate = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.ErrorDriverLicense = new System.Windows.Forms.Label();
             this.driverLicense = new System.Windows.Forms.TextBox();
@@ -74,7 +74,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.label14 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBoxOutputInfo = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.labelErrorPath = new System.Windows.Forms.Label();
@@ -416,7 +416,7 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.ErrorReceivingDate);
-            this.groupBox2.Controls.Add(this.receivingDate);
+            this.groupBox2.Controls.Add(this.issuedDate);
             this.groupBox2.Location = new System.Drawing.Point(20, 116);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(378, 79);
@@ -435,12 +435,12 @@
             this.ErrorReceivingDate.TabIndex = 2;
             this.ErrorReceivingDate.Text = "                         ";
             // 
-            // receivingDate
+            // issuedDate
             // 
-            this.receivingDate.Location = new System.Drawing.Point(20, 29);
-            this.receivingDate.Name = "receivingDate";
-            this.receivingDate.Size = new System.Drawing.Size(336, 22);
-            this.receivingDate.TabIndex = 1;
+            this.issuedDate.Location = new System.Drawing.Point(20, 29);
+            this.issuedDate.Name = "issuedDate";
+            this.issuedDate.Size = new System.Drawing.Size(336, 22);
+            this.issuedDate.TabIndex = 1;
             // 
             // groupBox1
             // 
@@ -470,6 +470,7 @@
             this.driverLicense.Name = "driverLicense";
             this.driverLicense.Size = new System.Drawing.Size(336, 22);
             this.driverLicense.TabIndex = 0;
+            this.driverLicense.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.driverLicenseKeyPress);
             // 
             // crearAllButton
             // 
@@ -504,7 +505,7 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.label14);
-            this.groupBox5.Controls.Add(this.textBox1);
+            this.groupBox5.Controls.Add(this.textBoxOutputInfo);
             this.groupBox5.Controls.Add(this.button2);
             this.groupBox5.Controls.Add(this.groupBox6);
             this.groupBox5.Controls.Add(this.button1);
@@ -525,14 +526,14 @@
             this.label14.TabIndex = 23;
             this.label14.Text = "Developed by OVEP for Smartseeds";
             // 
-            // textBox1
+            // textBoxOutputInfo
             // 
-            this.textBox1.Location = new System.Drawing.Point(18, 22);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(464, 479);
-            this.textBox1.TabIndex = 22;
+            this.textBoxOutputInfo.Location = new System.Drawing.Point(18, 22);
+            this.textBoxOutputInfo.Multiline = true;
+            this.textBoxOutputInfo.Name = "textBoxOutputInfo";
+            this.textBoxOutputInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxOutputInfo.Size = new System.Drawing.Size(464, 479);
+            this.textBoxOutputInfo.TabIndex = 22;
             // 
             // button2
             // 
@@ -573,7 +574,7 @@
             this.textBoxPath.Size = new System.Drawing.Size(429, 22);
             this.textBoxPath.TabIndex = 8;
             // 
-            // Form1
+            // InquisitorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -583,7 +584,7 @@
             this.Controls.Add(this.groupBox4);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
+            this.Name = "InquisitorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Inquisitor 1.0";
             this.groupBox4.ResumeLayout(false);
@@ -624,9 +625,6 @@
         private System.Windows.Forms.TextBox textBoxCategories;
         private System.Windows.Forms.TextBox textBoxReceivingDate;
         private System.Windows.Forms.TextBox textBoxEndDate;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label ErrorReceivingDate;
-        private System.Windows.Forms.TextBox receivingDate;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label ErrorDriverLicense;
         private System.Windows.Forms.TextBox driverLicense;
@@ -638,7 +636,7 @@
         private System.Windows.Forms.TextBox textBoxPath;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label labelErrorPath;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBoxOutputInfo;
         private System.Windows.Forms.TextBox stateDescription1;
         private System.Windows.Forms.TextBox comment1;
         private System.Windows.Forms.TextBox date1;
@@ -658,6 +656,9 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label remainingTimeBox;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label ErrorReceivingDate;
+        private System.Windows.Forms.TextBox issuedDate;
     }
 }
 
