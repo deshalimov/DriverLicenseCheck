@@ -8,16 +8,18 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
 namespace DriverLicenseCheck
 {
-    public partial class Form1 : Form
+    public partial class InquisitorForm : Form
     {
-        public Form1()
+        public InquisitorForm()
         {
             InitializeComponent();
         }
@@ -26,25 +28,25 @@ namespace DriverLicenseCheck
         private const int timeout = 90000;
 
         // Кнопка проверить файл по введенным данным
-        private void SendRequestDataFromGIBDDButton(object sender, EventArgs e)
+        private async void SendRequestDataFromGIBDDButton(object sender, EventArgs e)
         {
             if (driverLicense.Text.Length == 0)
                 ErrorDriverLicense.Text = "Введите номер ВУ";
             else
                 ErrorDriverLicense.Text = "";
 
-            if (receivingDate.Text.Length == 0)
+            if (issuedDate.Text.Length == 0)
                 ErrorReceivingDate.Text = "Введите дату выдачи ВУ";
             else
                 ErrorReceivingDate.Text = "";
 
-            if (driverLicense.Text.Length > 0 && receivingDate.Text.Length > 0)
+            if (driverLicense.Text.Length > 0 && issuedDate.Text.Length > 0)
             {
                 // очистить поля вывода предыдущей информации
                 ClearAllOutput();
 
                 // Создать отчет
-                (int code, string message) res = createReportTest(driverLicense.Text, receivingDate.Text, false);
+                (int code, string message) res = createReportTest(driverLicense.Text, issuedDate.Text, false);
 
                 if (res.code == 200)
                 {
@@ -52,25 +54,22 @@ namespace DriverLicenseCheck
                     Thread timerThread = new Thread(TimerFunction);
                     timerThread.Start();
 
-                    // Создаем новый поток
-                    Thread thread = new Thread(AfterSendRequestDataFromGIBDDButton);
-
-                    // Запускаем поток через n минут 
-                    System.Threading.Timer timer = new System.Threading.Timer(_ => thread.Start(), null, timeout, Timeout.Infinite);
+                    // Получить данные из ГИБДД
+                    AfterSendRequestDataFromGIBDDButton();
                 }
                 else
                 {
                     MessageBox.Show("Код " + res.code + ". " + res.message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
             }
         }
 
         // Функция проверить файл по введенным данным
-        private void AfterSendRequestDataFromGIBDDButton()
+        private async void AfterSendRequestDataFromGIBDDButton()
         {
+            await Task.Delay(timeout); // ждем указанный таймаут
             // Создать отчет
-            (int code, string message) response = createReportTest(driverLicense.Text, receivingDate.Text, false);
+            (int code, string message) response = createReportTest(driverLicense.Text, issuedDate.Text, false);
 
             // Если создание отчета прошло успешно
             if (response.code == 200)
@@ -107,7 +106,6 @@ namespace DriverLicenseCheck
                     isActiveCategories.ForeColor = Color.Red;
                 }
 
-
                 stateDescription1.Invoke(new Action(() => stateDescription1.Text = resp_report["stateDescription1"]));
                 comment1.Invoke(new Action(() => comment1.Text = resp_report["comment1"]));
                 limitation1.Invoke(new Action(() => limitation1.Text = resp_report["limitation1"]));
@@ -117,7 +115,6 @@ namespace DriverLicenseCheck
                 comment2.Invoke(new Action(() => comment2.Text = resp_report["comment2"]));
                 limitation2.Invoke(new Action(() => limitation2.Text = resp_report["limitation2"]));
                 date2.Invoke(new Action(() => date2.Text = resp_report["date2"]));
-
             }
             else
             {
@@ -174,8 +171,6 @@ namespace DriverLicenseCheck
             }
             else
             {
-                //Console.WriteLine($"Ошибка: {response.Result.StatusCode}");
-
                 string errorMessage;
                 try
                 {
@@ -230,7 +225,6 @@ namespace DriverLicenseCheck
 
             // Отправляем GET запрос
             var response = client.GetAsync(url);
-
 
             if (response.Result.StatusCode.ToString() == "OK")
             {
@@ -330,7 +324,6 @@ namespace DriverLicenseCheck
                         }
                     }
                     catch { }
-
 
                     return data_from_GIBDD;
                 }
@@ -457,7 +450,7 @@ namespace DriverLicenseCheck
                                 data_from_GIBDD["date2"] = "Нет данных";
                             }
                         }
-                        catch 
+                        catch
                         {
                             data_from_GIBDD["stateDescription1"] = "Данные не получены";
                             data_from_GIBDD["comment1"] = "Данные не получены";
@@ -493,9 +486,7 @@ namespace DriverLicenseCheck
 
                         return data_from_GIBDD;
                     }
-
                 }
-
             }
             else
             {
@@ -512,9 +503,9 @@ namespace DriverLicenseCheck
         }
 
         //Кнопка "Проверить файл"
-        private void buttonCheckFile(object sender, EventArgs e)
+        private async void buttonCheckFile(object sender, EventArgs e)
         {
-            textBox1.Text = "";
+            textBoxOutputInfo.Text = "";
             labelErrorPath.Text = "";
             string fileName = textBoxPath.Text;
             if (fileName != "")
@@ -524,35 +515,40 @@ namespace DriverLicenseCheck
                 // прочитать данные из файла
                 try
                 {
-                    string[] data = File.ReadAllLines(fileName);
+                    string[] file = File.ReadAllLines(fileName, Encoding.UTF8);
 
+                    textBoxOutputInfo.Text += "Ожидание получения данных составляет " + (Convert.ToDouble(timeout) / 60000) + " минуты. Пожалуйста, не препятствуйте работе программы. По окончанию получения данных вы получите уведомление." + Environment.NewLine + Environment.NewLine;
 
-                    textBox1.Text += "Ожидание получения данных составляет " + (Convert.ToDouble(timeout) / 60000) + " минуты. Пожалуйста, не препятствуйте работе программы. По окончанию получения данных вы получите уведомление." + Environment.NewLine + Environment.NewLine;
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-                    // ЗАПРОСИТЬ ФАЙЛ ИЗ СПЕКТРУМ
-                    for (int i = 1; i < data.Length; i++)
+                    // Открываем файл Excel
+                    FileInfo existingFile = new FileInfo(fileName);
+
+                    using (ExcelPackage package = new ExcelPackage(existingFile))
                     {
-                        // получить серию, номер и дату выдачи ВУ из файла
-                        string driver_licence = data[i].Split(';')[10].Replace("\"", "");
-                        string date_issue = data[i].Split(';')[11].Replace("\"", "");
+                        // Получаем первый рабочий лист
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
 
-                        //
-                        textBox1.Text += "Получение данных по ВУ " + driver_licence + Environment.NewLine;
+                        // Определяем количество строк и столбцов
+                        int rowCount = worksheet.Dimension.Rows;
+                        int colCount = worksheet.Dimension.Columns;
 
-                        // Создать отчет
-                        createReportTest(driver_licence, date_issue, false);
+                        for (int i = 1; i < rowCount; i++)
+                        {
+                            string licence_plate = worksheet.Cells[i + 1, 11].Text.Replace(" ", "");
+                            string issue_date_licence_plate = worksheet.Cells[i + 1, 12].Text;
+
+                            textBoxOutputInfo.Text += "Получение данных по ВУ " + licence_plate + Environment.NewLine;
+
+                            // Создать отчет
+                            createReportTest(licence_plate, issue_date_licence_plate, false);
+                        }
+                        // Создаем новый поток на получение времени
+                        Thread timerThread = new Thread(TimerFunction);
+                        timerThread.Start();
+
+                        StartAfterDelay();
                     }
-
-                    // Создаем новый поток на получение времени
-                    Thread timerThread = new Thread(TimerFunction);
-                    timerThread.Start();
-
-                    // Создаем новый поток
-                    Thread thread = new Thread(StartAfterDelay);
-
-                    // Запускаем поток через n минут
-                    System.Threading.Timer timer = new System.Threading.Timer(_ => thread.Start(), null, timeout, Timeout.Infinite);
-
                 }
                 catch (Exception x)
                 {
@@ -565,137 +561,95 @@ namespace DriverLicenseCheck
             }
         }
 
-        void StartAfterDelay()
+        async void StartAfterDelay()
         {
+            // Добавляем отступ в блоке вывода
+            textBoxOutputInfo.Invoke(new Action(() => textBoxOutputInfo.Text += Environment.NewLine));
+
+            // ждем указанный таймаут
+            await Task.Delay(timeout);
+
+            // открываем файл Excel
             string fileName = textBoxPath.Text;
-            string[] data = File.ReadAllLines(fileName);
+            string[] data = File.ReadAllLines(fileName, Encoding.UTF8);
 
-            // добавить наименование столбцов в файл
-            data[0] += ";\"Серия и номер ВУ\"" +
-                ";\"Дата рождения водителя\"" +
-                ";\"Дата выдачи ВУ\"" +
-                ";\"Дата окончания действия ВУ\"" +
-                ";\"Категории ВУ\"" +
-                ";\"Комментарий ГИБДД\"" +
-                ";\"Наличие категорий CE\"" +
-
-                ";\"Информация о лишении\"" +
-                ";\"Комментарий о лишении\"" +
-                ";\"Срок лишения права управления (мес)\"" +
-                ";\"Дата постановления лишения\"" +
-                ";\"Информация о лишении\"" +
-                ";\"Комментарий о лишении\"" +
-                ";\"Срок лишения права управления (мес)\"" +
-                ";\"Дата постановления лишения\"";
-
-
-
-            for (int i = 1; i < data.Length; i++)
-            {
-                // получить серию, номер и дату выдачи ВУ из файла
-                string driver_licence = data[i].Split(';')[10].Replace("\"", "");
-                string date_issue = data[i].Split(';')[11].Replace("\"", "");
-
-                textBox1.Invoke(new Action(() => textBox1.Text += "Данные получены по ВУ " + driver_licence + Environment.NewLine));
-                //textBox1.Text += "Данные получены по ВУ " + driver_licence + Environment.NewLine;
-
-
-
-                // Создать отчет
-                (int code, string message) response = createReportTest(driver_licence, date_issue, false);
-                if (response.code == 200)
-                {
-                    // Получить данные из отчета
-                    Dictionary<string, string> responceFromGIBDD = getInformationTEST(response.message);
-
-                    // Записать в файл данные из отчета
-                    data[i] += ";\"" + responceFromGIBDD["SeriesAndNumber"]
-                        + "\";\"" + responceFromGIBDD["Birthday"]
-                        + "\";\"" + responceFromGIBDD["IssuedDate"]
-                        + "\";\"" + responceFromGIBDD["EndDate"]
-                        + "\";\"" + responceFromGIBDD["Category"]
-                        + "\";\"" + responceFromGIBDD["Comment"]
-                        + "\";\"" + responceFromGIBDD["CategoryCE"]
-
-                        + "\";\"" + responceFromGIBDD["stateDescription1"]
-                        + "\";\"" + responceFromGIBDD["comment1"]
-                        + "\";\"" + responceFromGIBDD["limitation1"]
-                        + "\";\"" + responceFromGIBDD["date1"]
-
-                        + "\";\"" + responceFromGIBDD["stateDescription2"]
-                        + "\";\"" + responceFromGIBDD["comment2"]
-                        + "\";\"" + responceFromGIBDD["limitation2"]
-                        + "\";\"" + responceFromGIBDD["date2"] + "\"";
-                    /*data[i] += ";\"";
-                    foreach (var items in responceFromGIBDD)
-                    {
-                        data[i] += items.Value
-                    }*/
-                }
-                else
-                {
-                    data[i] += ";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message
-                        + "\";\"" + response.message + "\"";
-                }
-            }
-            File.WriteAllLines(fileName, data, Encoding.UTF8);
-            SaveToExcel(data, fileName);
-            //textBox1.Text += "Все данные получены. Файл обновлен";
-            MessageBox.Show("Файл обновлен", "");
-        }
-
-        private void SaveToExcel(string[] data, string filename)
-        {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            string excelFilePath = filename.Replace(".csv", ".xlsx");
+            // Открываем файл Excel
+            FileInfo existingFile = new FileInfo(fileName);
 
-            using (ExcelPackage excelPackage = new ExcelPackage())
+            using (ExcelPackage package = new ExcelPackage(existingFile))
             {
-                // Создание рабочего листа
-                var workSheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+                // Получаем первый рабочий лист
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
 
-                // Перебор данных и запись в Excel
-                for (int i = 0; i < data.Length; i++)
+                // Новые заголовки
+                string[] headers = {
+                "Серия и номер ВУ",
+                "Дата рождения водителя",
+                "Дата выдачи ВУ",
+                "Дата окончания действия ВУ",
+                "Категории ВУ",
+                "Комментарий ГИБДД",
+                "Наличие категорий CE",
+                "Информация о лишении",
+                "Комментарий о лишении",
+                "Срок лишения права управления (мес)",
+                "Дата постановления лишения",
+                "Информация о лишении",
+                "Комментарий о лишении",
+                "Срок лишения права управления (мес)",
+                "Дата постановления лишения"
+                };
+
+                // Определяем количество строк и столбцов
+                int rowCount = worksheet.Dimension.Rows;
+                int colCount = worksheet.Dimension.Columns;
+
+                // Добавить заголовки в файл
+                for (int i = 0; i < headers.Length; i++)
                 {
-                    // Разделение строки по точке с запятой
-                    string[] values = data[i].Split(';');
+                    worksheet.Cells[1, colCount + i + 1].Value = headers[i];
+                }
 
-                    // Запись данных в соответствующие ячейки
-                    for (int j = 0; j < values.Length; j++)
+                for (int i = 1; i < rowCount; i++)
+                {
+                    // Получить номер ВУ и дату выдачи
+                    string licence_plate = worksheet.Cells[i + 1, 11].Text;
+                    string issue_date_licence_plate = worksheet.Cells[i + 1, 12].Text;
+
+                    textBoxOutputInfo.Invoke(new Action(() => textBoxOutputInfo.Text += "Данные получены по ВУ " + licence_plate + Environment.NewLine));
+
+                    // Создать отчет
+                    (int code, string message) response = createReportTest(licence_plate, issue_date_licence_plate, false);
+                    if (response.code == 200)
                     {
-                        workSheet.Cells[i + 1, j + 1].Value = values[j].Trim().Replace("\"", ""); // Записываем значения, убирая лишние пробелы
+                        // Получить данные из отчета
+                        Dictionary<string, string> responceFromGIBDD = getInformationTEST(response.message);
+
+                        for (int j = 0; j < responceFromGIBDD.Count; j++)
+                        {
+                            worksheet.Cells[i + 1, j + 1 + colCount].Value = responceFromGIBDD.ElementAt(j).Value;
+                        }
+                    }
+                    else
+                    {
+                        for (int k = 0; k < headers.Length; k++)
+                        {
+                            worksheet.Cells[i + 1, k + 1 + colCount].Value = response.message;
+                        }
                     }
                 }
 
-                try
-                {
-                    // Сохранить excel файл
-                    excelPackage.SaveAs(new FileInfo(excelFilePath));
+                // Сохраняем изменения в файл
+                package.Save();
 
-                    // Покрасить колонки в красный
-                    ChangeRowColorBySearchData(excelFilePath);
-                }
-                catch (Exception x)
-                {
-                    MessageBox.Show(x.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                // Красим строки в красный цвет если есть нарушение
+                ChangeRowColorBySearchData(fileName);
+
+                MessageBox.Show("Файл обновлен", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-
         // Покрасить в цвет
         static void ChangeRowColorBySearchData(string excelFilePath)
         {
@@ -741,8 +695,6 @@ namespace DriverLicenseCheck
                 // Сохраняем изменения в тот же файл
                 package.Save();
             }
-
-
         }
 
         // Функция форматирования даты
@@ -778,7 +730,7 @@ namespace DriverLicenseCheck
         {
             // Очистить пользовательские поля ввода
             driverLicense.Text = "";
-            receivingDate.Text = "";
+            issuedDate.Text = "";
             ClearAllOutput();
         }
 
@@ -789,7 +741,7 @@ namespace DriverLicenseCheck
             ErrorDriverLicense.Text = "";
             ErrorReceivingDate.Text = "";
 
-            textBox1.Text = "";
+            textBoxOutputInfo.Text = "";
 
             // Очистить поля вывода данных из ГИБДД
             textBoxSeriesAndNumber.Text = "";
@@ -819,7 +771,7 @@ namespace DriverLicenseCheck
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = "c:\\";
-                openFileDialog.Filter = "csv файлы (*.csv)|*.csv"; //Все файлы (*.*)|*.*|
+                openFileDialog.Filter = "Excel файлы (*.xlsx)|*.xlsx"; //Все файлы (*.*)|*.*|
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
 
@@ -849,6 +801,14 @@ namespace DriverLicenseCheck
             string tokenB64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
 
             return tokenB64;
+        }
+
+        private void driverLicenseKeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!Regex.IsMatch((sender as TextBox).Text + e.KeyChar, @"^[0-9]+$") && !char.IsControl(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
     }
 }
