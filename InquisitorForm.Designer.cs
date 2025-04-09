@@ -73,6 +73,7 @@
             this.buttonGIBDD = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.checkBoxUpdateInfo = new System.Windows.Forms.CheckBox();
             this.label14 = new System.Windows.Forms.Label();
             this.textBoxOutputInfo = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
@@ -504,6 +505,7 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.checkBoxUpdateInfo);
             this.groupBox5.Controls.Add(this.label14);
             this.groupBox5.Controls.Add(this.textBoxOutputInfo);
             this.groupBox5.Controls.Add(this.button2);
@@ -515,6 +517,16 @@
             this.groupBox5.TabIndex = 20;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Проверка из файла";
+            // 
+            // checkBoxUpdateInfo
+            // 
+            this.checkBoxUpdateInfo.AutoSize = true;
+            this.checkBoxUpdateInfo.Location = new System.Drawing.Point(18, 559);
+            this.checkBoxUpdateInfo.Name = "checkBoxUpdateInfo";
+            this.checkBoxUpdateInfo.Size = new System.Drawing.Size(287, 20);
+            this.checkBoxUpdateInfo.TabIndex = 24;
+            this.checkBoxUpdateInfo.Text = "Принудительно обновить информацию";
+            this.checkBoxUpdateInfo.UseVisualStyleBackColor = true;
             // 
             // label14
             // 
@@ -532,7 +544,7 @@
             this.textBoxOutputInfo.Multiline = true;
             this.textBoxOutputInfo.Name = "textBoxOutputInfo";
             this.textBoxOutputInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxOutputInfo.Size = new System.Drawing.Size(464, 479);
+            this.textBoxOutputInfo.Size = new System.Drawing.Size(464, 452);
             this.textBoxOutputInfo.TabIndex = 22;
             // 
             // button2
@@ -549,7 +561,7 @@
             // 
             this.groupBox6.Controls.Add(this.labelErrorPath);
             this.groupBox6.Controls.Add(this.textBoxPath);
-            this.groupBox6.Location = new System.Drawing.Point(18, 513);
+            this.groupBox6.Location = new System.Drawing.Point(18, 480);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(464, 72);
             this.groupBox6.TabIndex = 20;
@@ -659,6 +671,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label ErrorReceivingDate;
         private System.Windows.Forms.TextBox issuedDate;
+        private System.Windows.Forms.CheckBox checkBoxUpdateInfo;
     }
 }
 

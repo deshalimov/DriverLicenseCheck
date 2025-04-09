@@ -46,7 +46,7 @@ namespace DriverLicenseCheck
                 ClearAllOutput();
 
                 // Создать отчет
-                (int code, string message) res = createReportTest(driverLicense.Text, issuedDate.Text, false);
+                (int code, string message) res = createReportTest(driverLicense.Text, issuedDate.Text, checkBoxUpdateInfo.Checked);
 
                 if (res.code == 200)
                 {
@@ -467,9 +467,25 @@ namespace DriverLicenseCheck
                     // Если по отчету старого образца возникла ошибка
                     catch
                     {
+                        try
+                        {
+                            var data_driver_lp = jsonResponse.RootElement
+                               .GetProperty("data")[0]
+                               .GetProperty("query")
+                               .GetProperty("data");
+
+                            // Серия и номер ВУ
+                            data_from_GIBDD["SeriesAndNumber"] = data_driver_lp.GetProperty("driver_license").ToString();
+
+                            // Дата выдачи ВУ
+                            data_from_GIBDD["IssuedDate"] = data_driver_lp.GetProperty("driver_license_date").ToString();
+                        }
+                        catch
+                        {
+                            data_from_GIBDD["SeriesAndNumber"] = "Данные не получены";
+                            data_from_GIBDD["IssuedDate"] = "Данные не получены";
+                        }
                         data_from_GIBDD["Category"] = "Данные не получены";
-                        data_from_GIBDD["SeriesAndNumber"] = "Данные не получены";
-                        data_from_GIBDD["IssuedDate"] = "Данные не получены";
                         data_from_GIBDD["Birthday"] = "Данные не получены";
                         data_from_GIBDD["EndDate"] = "Данные не получены";
                         data_from_GIBDD["Comment"] = "Данные не получены";
@@ -535,15 +551,20 @@ namespace DriverLicenseCheck
 
                         for (int i = 1; i < rowCount; i++)
                         {
-                            string licence_plate = worksheet.Cells[i + 1, 11].Text.Replace(" ", "");
-                            string issue_date_licence_plate = worksheet.Cells[i + 1, 12].Text;
+                            var licence_plate_value = worksheet.Cells[i + 1, 11].Value;
+                            var issue_date_licence_plate_value = worksheet.Cells[i + 1, 12].Value;
 
-                            textBoxOutputInfo.Text += "Получение данных по ВУ " + licence_plate + Environment.NewLine;
+                            if (licence_plate_value != null && issue_date_licence_plate_value != null)
+                            {
+                                string issue_date_licence_plate = worksheet.Cells[i + 1, 12].ToText().Replace("/", ".");
+                                textBoxOutputInfo.Text += "Получение данных по ВУ " + licence_plate_value.ToString() + ", от " + issue_date_licence_plate + Environment.NewLine;
 
-                            // Создать отчет
-                            createReportTest(licence_plate, issue_date_licence_plate, false);
+
+                                // Создать отчет
+                                createReportTest(licence_plate_value.ToString(), issue_date_licence_plate, checkBoxUpdateInfo.Checked);
+                            }
                         }
-                        // Создаем новый поток на получение времени
+                        // Создаем новый поток на получение времени                       
                         Thread timerThread = new Thread(TimerFunction);
                         timerThread.Start();
 
@@ -606,6 +627,7 @@ namespace DriverLicenseCheck
                 int rowCount = worksheet.Dimension.Rows;
                 int colCount = worksheet.Dimension.Columns;
 
+
                 // Добавить заголовки в файл
                 for (int i = 0; i < headers.Length; i++)
                 {
@@ -615,28 +637,32 @@ namespace DriverLicenseCheck
                 for (int i = 1; i < rowCount; i++)
                 {
                     // Получить номер ВУ и дату выдачи
-                    string licence_plate = worksheet.Cells[i + 1, 11].Text;
-                    string issue_date_licence_plate = worksheet.Cells[i + 1, 12].Text;
+                    var licence_plate_value = worksheet.Cells[i + 1, 11].Value;
+                    var issue_date_licence_plate_value = worksheet.Cells[i + 1, 12].Value;
 
-                    textBoxOutputInfo.Invoke(new Action(() => textBoxOutputInfo.Text += "Данные получены по ВУ " + licence_plate + Environment.NewLine));
-
-                    // Создать отчет
-                    (int code, string message) response = createReportTest(licence_plate, issue_date_licence_plate, false);
-                    if (response.code == 200)
+                    if (licence_plate_value != null && issue_date_licence_plate_value != null)
                     {
-                        // Получить данные из отчета
-                        Dictionary<string, string> responceFromGIBDD = getInformationTEST(response.message);
+                        string issue_date_licence_plate = worksheet.Cells[i + 1, 12].ToText().Replace("/", ".");
+                        textBoxOutputInfo.Invoke(new Action(() => textBoxOutputInfo.Text += "Данные получены по ВУ " + licence_plate_value + ", от " + issue_date_licence_plate + Environment.NewLine));
 
-                        for (int j = 0; j < responceFromGIBDD.Count; j++)
+                        // Создать отчет
+                        (int code, string message) response = createReportTest(licence_plate_value.ToString(), issue_date_licence_plate, false);
+                        if (response.code == 200)
                         {
-                            worksheet.Cells[i + 1, j + 1 + colCount].Value = responceFromGIBDD.ElementAt(j).Value;
+                            // Получить данные из отчета
+                            Dictionary<string, string> responceFromGIBDD = getInformationTEST(response.message);
+
+                            for (int j = 0; j < responceFromGIBDD.Count; j++)
+                            {
+                                worksheet.Cells[i + 1, j + 1 + colCount].Value = responceFromGIBDD.ElementAt(j).Value;
+                            }
                         }
-                    }
-                    else
-                    {
-                        for (int k = 0; k < headers.Length; k++)
+                        else
                         {
-                            worksheet.Cells[i + 1, k + 1 + colCount].Value = response.message;
+                            for (int k = 0; k < headers.Length; k++)
+                            {
+                                worksheet.Cells[i + 1, k + 1 + colCount].Value = response.message;
+                            }
                         }
                     }
                 }
@@ -684,6 +710,7 @@ namespace DriverLicenseCheck
                             {
                                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                                 range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Red);
+                                worksheet.Cells[row, col].Style.Font.Color.SetColor(System.Drawing.Color.White);
                             }
 
                             // Выходим из внутреннего цикла, поскольку строки уже окрашены
