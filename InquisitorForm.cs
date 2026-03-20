@@ -19,13 +19,16 @@ namespace DriverLicenseCheck
 {
     public partial class InquisitorForm : Form
     {
-        public InquisitorForm()
-        {
-            InitializeComponent();
-        }
+
 
         // таймаут получения данных
         private const int timeout = 90000;
+        private static readonly HttpClient _httpClient = new HttpClient();
+        public InquisitorForm()
+        {
+            InitializeComponent();
+            GetQuotesUsed();
+        }
 
         // Кнопка проверить файл по введенным данным
         private async void SendRequestDataFromGIBDDButton(object sender, EventArgs e)
@@ -62,6 +65,7 @@ namespace DriverLicenseCheck
                     MessageBox.Show("Код " + res.code + ". " + res.message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            GetQuotesUsed();
         }
 
         // Функция проверить файл по введенным данным
@@ -125,8 +129,9 @@ namespace DriverLicenseCheck
         // Функция отправки отчета в Spectrum
         public static (int, string) createReportTest(string driver_license, string driver_license_date, bool force)
         {
-            string url = "https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/report_dl_main@smartseeds/_make";
-            HttpClient client = new HttpClient();
+          
+
+            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make"; 
 
             // Создаем объект запроса
             var requestData = new
@@ -149,11 +154,11 @@ namespace DriverLicenseCheck
             var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
             // Установка заголовков
-            client.DefaultRequestHeaders.Authorization =
+            _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
 
             // отправка запроса
-            var response = client.PostAsync(url, content);
+            var response = _httpClient.PostAsync(url, content);
 
             if (response.Result.StatusCode.ToString() == "OK")
             {
@@ -216,15 +221,12 @@ namespace DriverLicenseCheck
             // Сгенерить URL адрес
             string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{uid}?_content=true&_detailed=false";
 
-            // Создать HTTP клиента
-            HttpClient client = new HttpClient();
-
             // Установка заголовков
-            client.DefaultRequestHeaders.Authorization =
+            _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
 
             // Отправляем GET запрос
-            var response = client.GetAsync(url);
+            var response = _httpClient.GetAsync(url);
 
             if (response.Result.StatusCode.ToString() == "OK")
             {
@@ -580,6 +582,7 @@ namespace DriverLicenseCheck
             {
                 labelErrorPath.Text = "Выберите файл";
             }
+            GetQuotesUsed();
         }
 
         async void StartAfterDelay()
@@ -815,8 +818,8 @@ namespace DriverLicenseCheck
         // Функция генерация токена
         public static string GenerateToken(int age = 60 * 60 * 24)
         {
-            string user = "";
-            string password = "";
+            string user = _login; 
+            string password = _password;
             var timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             string passwordHash = Convert.ToBase64String(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(password)));
@@ -828,6 +831,32 @@ namespace DriverLicenseCheck
             string tokenB64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
 
             return tokenB64;
+        }
+
+        async Task GetQuotesUsed()
+        {
+            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/balance/{enviroment}";
+
+            // Установка заголовков
+            _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
+
+            // отправка запроса
+            var response = _httpClient.GetAsync(url);
+
+            //string errorBody = await response.Content.ReadAsStringAsync();
+            //var responseBody = response.Result.Content.ReadAsStringAsync().Result;
+
+            //var jsonResponse = JsonDocument.Parse(responseBody);
+            //string time = jsonResponse.RootElement.GetProperty("data").GetString();
+
+            var resdata = JsonDocument.Parse(response.Result.Content.ReadAsStringAsync().Result).RootElement.GetProperty("data");
+            string day = resdata[0].GetProperty("quote_use").ToString();
+            string mounth = resdata[1].GetProperty("quote_use").ToString();
+            string alltime = resdata[2].GetProperty("quote_use").ToString();
+
+            label15.Text = $"Использовано {mounth} квот за месяц, {day} за сегодня.";
+
         }
 
         private void driverLicenseKeyPress(object sender, KeyPressEventArgs e)

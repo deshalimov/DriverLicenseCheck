@@ -80,6 +80,7 @@
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.labelErrorPath = new System.Windows.Forms.Label();
             this.textBoxPath = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -100,8 +101,10 @@
             this.groupBox4.Controls.Add(this.crearAllButton);
             this.groupBox4.Controls.Add(this.buttonGIBDD);
             this.groupBox4.Location = new System.Drawing.Point(36, 34);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(910, 654);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox4.Size = new System.Drawing.Size(909, 654);
             this.groupBox4.TabIndex = 14;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Ручная проверка";
@@ -143,7 +146,9 @@
             this.groupBox3.Controls.Add(this.textBoxReceivingDate);
             this.groupBox3.Controls.Add(this.textBoxEndDate);
             this.groupBox3.Location = new System.Drawing.Point(439, 21);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox3.Size = new System.Drawing.Size(449, 615);
             this.groupBox3.TabIndex = 18;
             this.groupBox3.TabStop = false;
@@ -159,7 +164,9 @@
             this.groupBox8.Controls.Add(this.date2);
             this.groupBox8.Controls.Add(this.comment2);
             this.groupBox8.Location = new System.Drawing.Point(13, 459);
+            this.groupBox8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox8.Size = new System.Drawing.Size(423, 143);
             this.groupBox8.TabIndex = 19;
             this.groupBox8.TabStop = false;
@@ -168,7 +175,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(217, 93);
+            this.label12.Location = new System.Drawing.Point(217, 94);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(133, 16);
             this.label12.TabIndex = 28;
@@ -177,7 +184,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(13, 93);
+            this.label11.Location = new System.Drawing.Point(13, 94);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(143, 16);
             this.label11.TabIndex = 27;
@@ -196,14 +203,16 @@
             // 
             this.limitation2.ForeColor = System.Drawing.SystemColors.WindowText;
             this.limitation2.Location = new System.Drawing.Point(216, 108);
+            this.limitation2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.limitation2.Name = "limitation2";
-            this.limitation2.Size = new System.Drawing.Size(190, 22);
+            this.limitation2.Size = new System.Drawing.Size(191, 22);
             this.limitation2.TabIndex = 26;
             // 
             // stateDescription2
             // 
             this.stateDescription2.ForeColor = System.Drawing.SystemColors.WindowText;
             this.stateDescription2.Location = new System.Drawing.Point(13, 37);
+            this.stateDescription2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.stateDescription2.Name = "stateDescription2";
             this.stateDescription2.Size = new System.Drawing.Size(393, 22);
             this.stateDescription2.TabIndex = 23;
@@ -212,6 +221,7 @@
             // 
             this.date2.ForeColor = System.Drawing.SystemColors.WindowText;
             this.date2.Location = new System.Drawing.Point(16, 108);
+            this.date2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.date2.Name = "date2";
             this.date2.Size = new System.Drawing.Size(191, 22);
             this.date2.TabIndex = 25;
@@ -220,6 +230,7 @@
             // 
             this.comment2.ForeColor = System.Drawing.SystemColors.WindowText;
             this.comment2.Location = new System.Drawing.Point(13, 68);
+            this.comment2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.comment2.Name = "comment2";
             this.comment2.Size = new System.Drawing.Size(393, 22);
             this.comment2.TabIndex = 24;
@@ -234,7 +245,9 @@
             this.groupBox7.Controls.Add(this.date1);
             this.groupBox7.Controls.Add(this.limitation1);
             this.groupBox7.Location = new System.Drawing.Point(13, 310);
+            this.groupBox7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox7.Size = new System.Drawing.Size(423, 143);
             this.groupBox7.TabIndex = 21;
             this.groupBox7.TabStop = false;
@@ -243,7 +256,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(216, 93);
+            this.label9.Location = new System.Drawing.Point(216, 94);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(133, 16);
             this.label9.TabIndex = 25;
@@ -252,7 +265,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(13, 93);
+            this.label8.Location = new System.Drawing.Point(13, 94);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(143, 16);
             this.label8.TabIndex = 24;
@@ -271,6 +284,7 @@
             // 
             this.stateDescription1.ForeColor = System.Drawing.SystemColors.WindowText;
             this.stateDescription1.Location = new System.Drawing.Point(16, 37);
+            this.stateDescription1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.stateDescription1.Name = "stateDescription1";
             this.stateDescription1.Size = new System.Drawing.Size(393, 22);
             this.stateDescription1.TabIndex = 19;
@@ -279,6 +293,7 @@
             // 
             this.comment1.ForeColor = System.Drawing.SystemColors.WindowText;
             this.comment1.Location = new System.Drawing.Point(16, 68);
+            this.comment1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.comment1.Name = "comment1";
             this.comment1.Size = new System.Drawing.Size(393, 22);
             this.comment1.TabIndex = 20;
@@ -287,6 +302,7 @@
             // 
             this.date1.ForeColor = System.Drawing.SystemColors.WindowText;
             this.date1.Location = new System.Drawing.Point(16, 111);
+            this.date1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.date1.Name = "date1";
             this.date1.Size = new System.Drawing.Size(191, 22);
             this.date1.TabIndex = 22;
@@ -294,7 +310,8 @@
             // limitation1
             // 
             this.limitation1.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.limitation1.Location = new System.Drawing.Point(218, 111);
+            this.limitation1.Location = new System.Drawing.Point(219, 111);
+            this.limitation1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.limitation1.Name = "limitation1";
             this.limitation1.Size = new System.Drawing.Size(191, 22);
             this.limitation1.TabIndex = 21;
@@ -302,7 +319,7 @@
             // isActiveCategories
             // 
             this.isActiveCategories.AutoSize = true;
-            this.isActiveCategories.Location = new System.Drawing.Point(20, 237);
+            this.isActiveCategories.Location = new System.Drawing.Point(20, 238);
             this.isActiveCategories.Name = "isActiveCategories";
             this.isActiveCategories.Size = new System.Drawing.Size(82, 16);
             this.isActiveCategories.TabIndex = 18;
@@ -366,7 +383,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 29);
+            this.label1.Location = new System.Drawing.Point(17, 30);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(123, 16);
             this.label1.TabIndex = 11;
@@ -375,6 +392,7 @@
             // textBoxSeriesAndNumber
             // 
             this.textBoxSeriesAndNumber.Location = new System.Drawing.Point(20, 48);
+            this.textBoxSeriesAndNumber.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxSeriesAndNumber.Name = "textBoxSeriesAndNumber";
             this.textBoxSeriesAndNumber.Size = new System.Drawing.Size(409, 22);
             this.textBoxSeriesAndNumber.TabIndex = 5;
@@ -382,13 +400,15 @@
             // textBoxGibddDataFoundComment
             // 
             this.textBoxGibddDataFoundComment.Location = new System.Drawing.Point(20, 274);
+            this.textBoxGibddDataFoundComment.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxGibddDataFoundComment.Name = "textBoxGibddDataFoundComment";
             this.textBoxGibddDataFoundComment.Size = new System.Drawing.Size(409, 22);
             this.textBoxGibddDataFoundComment.TabIndex = 10;
             // 
             // textBoxBirthday
             // 
-            this.textBoxBirthday.Location = new System.Drawing.Point(20, 104);
+            this.textBoxBirthday.Location = new System.Drawing.Point(20, 103);
+            this.textBoxBirthday.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxBirthday.Name = "textBoxBirthday";
             this.textBoxBirthday.Size = new System.Drawing.Size(409, 22);
             this.textBoxBirthday.TabIndex = 6;
@@ -396,6 +416,7 @@
             // textBoxCategories
             // 
             this.textBoxCategories.Location = new System.Drawing.Point(20, 212);
+            this.textBoxCategories.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxCategories.Name = "textBoxCategories";
             this.textBoxCategories.Size = new System.Drawing.Size(409, 22);
             this.textBoxCategories.TabIndex = 9;
@@ -403,6 +424,7 @@
             // textBoxReceivingDate
             // 
             this.textBoxReceivingDate.Location = new System.Drawing.Point(20, 158);
+            this.textBoxReceivingDate.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxReceivingDate.Name = "textBoxReceivingDate";
             this.textBoxReceivingDate.Size = new System.Drawing.Size(200, 22);
             this.textBoxReceivingDate.TabIndex = 7;
@@ -410,6 +432,7 @@
             // textBoxEndDate
             // 
             this.textBoxEndDate.Location = new System.Drawing.Point(232, 158);
+            this.textBoxEndDate.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxEndDate.Name = "textBoxEndDate";
             this.textBoxEndDate.Size = new System.Drawing.Size(197, 22);
             this.textBoxEndDate.TabIndex = 8;
@@ -419,8 +442,10 @@
             this.groupBox2.Controls.Add(this.ErrorReceivingDate);
             this.groupBox2.Controls.Add(this.issuedDate);
             this.groupBox2.Location = new System.Drawing.Point(20, 116);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(378, 79);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox2.Size = new System.Drawing.Size(379, 79);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Дата выдачи ВУ";
@@ -438,7 +463,8 @@
             // 
             // issuedDate
             // 
-            this.issuedDate.Location = new System.Drawing.Point(20, 29);
+            this.issuedDate.Location = new System.Drawing.Point(20, 30);
+            this.issuedDate.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.issuedDate.Name = "issuedDate";
             this.issuedDate.Size = new System.Drawing.Size(336, 22);
             this.issuedDate.TabIndex = 1;
@@ -448,8 +474,10 @@
             this.groupBox1.Controls.Add(this.ErrorDriverLicense);
             this.groupBox1.Controls.Add(this.driverLicense);
             this.groupBox1.Location = new System.Drawing.Point(20, 27);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(378, 79);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox1.Size = new System.Drawing.Size(379, 79);
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Номер ВУ";
@@ -467,7 +495,8 @@
             // 
             // driverLicense
             // 
-            this.driverLicense.Location = new System.Drawing.Point(20, 29);
+            this.driverLicense.Location = new System.Drawing.Point(20, 30);
+            this.driverLicense.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.driverLicense.Name = "driverLicense";
             this.driverLicense.Size = new System.Drawing.Size(336, 22);
             this.driverLicense.TabIndex = 0;
@@ -476,8 +505,9 @@
             // crearAllButton
             // 
             this.crearAllButton.Location = new System.Drawing.Point(20, 368);
+            this.crearAllButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.crearAllButton.Name = "crearAllButton";
-            this.crearAllButton.Size = new System.Drawing.Size(378, 30);
+            this.crearAllButton.Size = new System.Drawing.Size(379, 30);
             this.crearAllButton.TabIndex = 14;
             this.crearAllButton.Text = "Очистить";
             this.crearAllButton.UseVisualStyleBackColor = true;
@@ -486,8 +516,9 @@
             // buttonGIBDD
             // 
             this.buttonGIBDD.Location = new System.Drawing.Point(20, 321);
+            this.buttonGIBDD.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.buttonGIBDD.Name = "buttonGIBDD";
-            this.buttonGIBDD.Size = new System.Drawing.Size(378, 30);
+            this.buttonGIBDD.Size = new System.Drawing.Size(379, 30);
             this.buttonGIBDD.TabIndex = 13;
             this.buttonGIBDD.Text = "Проверить";
             this.buttonGIBDD.UseVisualStyleBackColor = true;
@@ -495,7 +526,8 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(18, 590);
+            this.button1.Location = new System.Drawing.Point(19, 590);
+            this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(136, 34);
             this.button1.TabIndex = 19;
@@ -512,8 +544,10 @@
             this.groupBox5.Controls.Add(this.groupBox6);
             this.groupBox5.Controls.Add(this.button1);
             this.groupBox5.Location = new System.Drawing.Point(969, 34);
+            this.groupBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(502, 654);
+            this.groupBox5.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox5.Size = new System.Drawing.Size(501, 654);
             this.groupBox5.TabIndex = 20;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Проверка из файла";
@@ -521,7 +555,8 @@
             // checkBoxUpdateInfo
             // 
             this.checkBoxUpdateInfo.AutoSize = true;
-            this.checkBoxUpdateInfo.Location = new System.Drawing.Point(18, 559);
+            this.checkBoxUpdateInfo.Location = new System.Drawing.Point(19, 559);
+            this.checkBoxUpdateInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkBoxUpdateInfo.Name = "checkBoxUpdateInfo";
             this.checkBoxUpdateInfo.Size = new System.Drawing.Size(287, 20);
             this.checkBoxUpdateInfo.TabIndex = 24;
@@ -532,7 +567,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.ForeColor = System.Drawing.SystemColors.ControlLight;
-            this.label14.Location = new System.Drawing.Point(244, 627);
+            this.label14.Location = new System.Drawing.Point(244, 626);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(227, 16);
             this.label14.TabIndex = 23;
@@ -540,7 +575,8 @@
             // 
             // textBoxOutputInfo
             // 
-            this.textBoxOutputInfo.Location = new System.Drawing.Point(18, 22);
+            this.textBoxOutputInfo.Location = new System.Drawing.Point(19, 22);
+            this.textBoxOutputInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxOutputInfo.Multiline = true;
             this.textBoxOutputInfo.Name = "textBoxOutputInfo";
             this.textBoxOutputInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -549,7 +585,8 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(346, 591);
+            this.button2.Location = new System.Drawing.Point(347, 591);
+            this.button2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(136, 33);
             this.button2.TabIndex = 21;
@@ -561,9 +598,11 @@
             // 
             this.groupBox6.Controls.Add(this.labelErrorPath);
             this.groupBox6.Controls.Add(this.textBoxPath);
-            this.groupBox6.Location = new System.Drawing.Point(18, 480);
+            this.groupBox6.Location = new System.Drawing.Point(19, 480);
+            this.groupBox6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(464, 72);
+            this.groupBox6.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox6.Size = new System.Drawing.Size(464, 71);
             this.groupBox6.TabIndex = 20;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Расположение файла";
@@ -582,9 +621,19 @@
             // textBoxPath
             // 
             this.textBoxPath.Location = new System.Drawing.Point(15, 21);
+            this.textBoxPath.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxPath.Name = "textBoxPath";
             this.textBoxPath.Size = new System.Drawing.Size(429, 22);
             this.textBoxPath.TabIndex = 8;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(36, 694);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(91, 16);
+            this.label15.TabIndex = 21;
+            this.label15.Text = "                            ";
             // 
             // InquisitorForm
             // 
@@ -592,13 +641,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1521, 725);
+            this.Controls.Add(this.label15);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "InquisitorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Inquisitor 1.0";
+            this.Text = "Inquisitor 1.1";
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -616,6 +667,7 @@
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -672,6 +724,7 @@
         private System.Windows.Forms.Label ErrorReceivingDate;
         private System.Windows.Forms.TextBox issuedDate;
         private System.Windows.Forms.CheckBox checkBoxUpdateInfo;
+        private System.Windows.Forms.Label label15;
     }
 }
 
