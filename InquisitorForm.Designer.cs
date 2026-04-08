@@ -73,6 +73,8 @@
             this.buttonGIBDD = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.forcedVerificationDate = new System.Windows.Forms.NumericUpDown();
+            this.label17 = new System.Windows.Forms.Label();
             this.checkBoxUpdateInfo = new System.Windows.Forms.CheckBox();
             this.label14 = new System.Windows.Forms.Label();
             this.textBoxOutputInfo = new System.Windows.Forms.TextBox();
@@ -81,6 +83,7 @@
             this.labelErrorPath = new System.Windows.Forms.Label();
             this.textBoxPath = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
+            this.forcedVerificationCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -88,6 +91,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.forcedVerificationDate)).BeginInit();
             this.groupBox6.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -500,7 +504,7 @@
             this.driverLicense.Name = "driverLicense";
             this.driverLicense.Size = new System.Drawing.Size(336, 22);
             this.driverLicense.TabIndex = 0;
-            this.driverLicense.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.driverLicenseKeyPress);
+            this.driverLicense.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DriverLicenseKeyPress);
             // 
             // crearAllButton
             // 
@@ -533,10 +537,13 @@
             this.button1.TabIndex = 19;
             this.button1.Text = "Выбрать файл";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.buttonGetPath);
+            this.button1.Click += new System.EventHandler(this.ButtonGetPath);
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.forcedVerificationCheckBox);
+            this.groupBox5.Controls.Add(this.forcedVerificationDate);
+            this.groupBox5.Controls.Add(this.label17);
             this.groupBox5.Controls.Add(this.checkBoxUpdateInfo);
             this.groupBox5.Controls.Add(this.label14);
             this.groupBox5.Controls.Add(this.textBoxOutputInfo);
@@ -547,20 +554,41 @@
             this.groupBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox5.Size = new System.Drawing.Size(501, 654);
+            this.groupBox5.Size = new System.Drawing.Size(544, 654);
             this.groupBox5.TabIndex = 20;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Проверка из файла";
             // 
+            // forcedVerificationDate
+            // 
+            this.forcedVerificationDate.Location = new System.Drawing.Point(408, 547);
+            this.forcedVerificationDate.Name = "forcedVerificationDate";
+            this.forcedVerificationDate.Size = new System.Drawing.Size(54, 22);
+            this.forcedVerificationDate.TabIndex = 30;
+            this.forcedVerificationDate.Value = new decimal(new int[] {
+            14,
+            0,
+            0,
+            0});
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(485, 549);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(39, 16);
+            this.label17.TabIndex = 29;
+            this.label17.Text = "дней";
+            // 
             // checkBoxUpdateInfo
             // 
             this.checkBoxUpdateInfo.AutoSize = true;
-            this.checkBoxUpdateInfo.Location = new System.Drawing.Point(19, 559);
+            this.checkBoxUpdateInfo.Location = new System.Drawing.Point(19, 520);
             this.checkBoxUpdateInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkBoxUpdateInfo.Name = "checkBoxUpdateInfo";
-            this.checkBoxUpdateInfo.Size = new System.Drawing.Size(287, 20);
+            this.checkBoxUpdateInfo.Size = new System.Drawing.Size(372, 20);
             this.checkBoxUpdateInfo.TabIndex = 24;
-            this.checkBoxUpdateInfo.Text = "Принудительно обновить информацию";
+            this.checkBoxUpdateInfo.Text = "Принудительно обновить всю информацию в файле";
             this.checkBoxUpdateInfo.UseVisualStyleBackColor = true;
             // 
             // label14
@@ -580,7 +608,7 @@
             this.textBoxOutputInfo.Multiline = true;
             this.textBoxOutputInfo.Name = "textBoxOutputInfo";
             this.textBoxOutputInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxOutputInfo.Size = new System.Drawing.Size(464, 452);
+            this.textBoxOutputInfo.Size = new System.Drawing.Size(505, 419);
             this.textBoxOutputInfo.TabIndex = 22;
             // 
             // button2
@@ -592,17 +620,17 @@
             this.button2.TabIndex = 21;
             this.button2.Text = "Проверить файл";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.buttonCheckFile);
+            this.button2.Click += new System.EventHandler(this.ButtonCheckFile);
             // 
             // groupBox6
             // 
             this.groupBox6.Controls.Add(this.labelErrorPath);
             this.groupBox6.Controls.Add(this.textBoxPath);
-            this.groupBox6.Location = new System.Drawing.Point(19, 480);
+            this.groupBox6.Location = new System.Drawing.Point(19, 445);
             this.groupBox6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox6.Size = new System.Drawing.Size(464, 71);
+            this.groupBox6.Size = new System.Drawing.Size(505, 71);
             this.groupBox6.TabIndex = 20;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Расположение файла";
@@ -623,7 +651,7 @@
             this.textBoxPath.Location = new System.Drawing.Point(15, 21);
             this.textBoxPath.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxPath.Name = "textBoxPath";
-            this.textBoxPath.Size = new System.Drawing.Size(429, 22);
+            this.textBoxPath.Size = new System.Drawing.Size(484, 22);
             this.textBoxPath.TabIndex = 8;
             // 
             // label15
@@ -635,12 +663,25 @@
             this.label15.TabIndex = 21;
             this.label15.Text = "                            ";
             // 
+            // forcedVerificationCheckBox
+            // 
+            this.forcedVerificationCheckBox.AutoSize = true;
+            this.forcedVerificationCheckBox.Checked = true;
+            this.forcedVerificationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.forcedVerificationCheckBox.Location = new System.Drawing.Point(19, 549);
+            this.forcedVerificationCheckBox.Name = "forcedVerificationCheckBox";
+            this.forcedVerificationCheckBox.Size = new System.Drawing.Size(372, 20);
+            this.forcedVerificationCheckBox.TabIndex = 31;
+            this.forcedVerificationCheckBox.Text = "Обновить, если дата последнего обновления  более";
+            this.forcedVerificationCheckBox.UseVisualStyleBackColor = true;
+            // 
             // InquisitorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1521, 725);
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.ClientSize = new System.Drawing.Size(1541, 725);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
@@ -649,7 +690,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "InquisitorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Inquisitor 1.1";
+            this.Text = "Inquisitor 2.0";
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -664,6 +705,7 @@
             this.groupBox1.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.forcedVerificationDate)).EndInit();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
             this.ResumeLayout(false);
@@ -725,6 +767,9 @@
         private System.Windows.Forms.TextBox issuedDate;
         private System.Windows.Forms.CheckBox checkBoxUpdateInfo;
         private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.NumericUpDown forcedVerificationDate;
+        private System.Windows.Forms.CheckBox forcedVerificationCheckBox;
     }
 }
 
