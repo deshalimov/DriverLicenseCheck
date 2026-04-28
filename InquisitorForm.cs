@@ -22,8 +22,7 @@ namespace DriverLicenseCheck
 
 
         // таймаут получения данных
-        private const int timeout = 90000
-            ;
+        private const int timeout = 90000;
         private static readonly HttpClient _httpClient = new HttpClient();
         public InquisitorForm()
         {
@@ -192,40 +191,6 @@ namespace DriverLicenseCheck
                 }
                 return ((int)response.StatusCode, errorMessage);
             }
-        }
-
-
-        // Функция отправки отчета в Spectrum
-        public static async Task<HttpResponseMessage> CreateReportTest(string driver_license, string driver_license_date, bool force)
-        {
-            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make";
-
-            // Создаем объект запроса
-            var requestData = new
-            {
-                queryType = "MULTIPART",
-                query = " ",
-                data = new
-                {
-                    driver_license,
-                    driver_license_date
-                },
-                options = new
-                {
-                    FORCE = force
-                }
-            };
-
-            // Сериализация объекта запроса в JSON
-            var jsonRequest = JsonSerializer.Serialize(requestData);
-            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-            // Установка заголовков
-            _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
-
-            // отправка запроса
-            return await _httpClient.PostAsync(url, content);
         }
 
 
@@ -580,28 +545,11 @@ namespace DriverLicenseCheck
                             if (licence_plate_value != null && issue_date_licence_plate_value != null)
                             {
                                 string issue_date_licence_plate = worksheet.Cells[i + 1, 12].ToText().Replace("/", ".");
-                                textBoxOutputInfo.AppendText("Получение данных по ВУ " + licence_plate_value.ToString() + ", от " + issue_date_licence_plate + Environment.NewLine);
-                                
+                                textBoxOutputInfo.AppendText("Запрос данных по ВУ " + licence_plate_value.ToString() + ", от " + issue_date_licence_plate + Environment.NewLine);
+
                                 ////////////////
                                 // СОЗДАТЬ ОТЧЕТ
-                                var response = await CreateReportTest(licence_plate_value.ToString(), issue_date_licence_plate, checkBoxUpdateInfo.Checked);
-
-                                if (!checkBoxUpdateInfo.Checked && forcedVerificationCheckBox.Checked)
-                                {
-                                    try
-                                    {
-                                        // получить дату последнего обновления
-                                        var json = await response.Content.ReadAsStringAsync();
-                                        var date = JsonDocument.Parse(json).RootElement.GetProperty("data")[0].GetProperty("suggest_get").ToString();
-
-                                        // если с последней даты обновления прошло N дней
-                                        if ((DateTime.UtcNow - DateTime.Parse(date).ToUniversalTime()).Days > int.Parse(forcedVerificationDate.Text))
-                                            // отправить принудительно на проверку
-                                            await CreateReportTest(licence_plate_value.ToString(), issue_date_licence_plate, true);
-                                    }
-                                    catch (Exception) { }
-                                }
-                                
+                                await CreateReportTestDEPRECATED(licence_plate_value.ToString(), issue_date_licence_plate, checkBoxUpdateInfo.Checked);
                             }
                         }
                         // Создаем новый поток на получение времени                       
@@ -686,65 +634,27 @@ namespace DriverLicenseCheck
                         textBoxOutputInfo.Invoke(new Action(() => textBoxOutputInfo.AppendText("Данные получены по ВУ " + licence_plate_value + ", от " + issue_date_licence_plate + Environment.NewLine)));
 
                         // Создать отчет
-                        var response = await CreateReportTest(licence_plate_value.ToString(), issue_date_licence_plate, false);
-                        if ((int)response.StatusCode == 200)
+                        //var response = await CreateReportTest(licence_plate_value.ToString(), issue_date_licence_plate, false); //new
+                        (int code, string message) response = await CreateReportTestDEPRECATED(licence_plate_value.ToString(), issue_date_licence_plate, false); //old
+                        if (response.code == 200)
                         {
-                            var jsonResponse = await response.Content.ReadAsStringAsync();;
-                            string message = JsonDocument.Parse(jsonResponse).RootElement.GetProperty("data")[0].GetProperty("uid").GetString();
                             // Получить данные из отчета
-                            Dictionary<string, string> responceFromGIBDD = await GetInformationTEST(message);
-                            /////
-                            // Формируем массив значений в нужном порядке
-                            object[] rowValues = new object[]
+                            Dictionary<string, string> responceFromGIBDD = await GetInformationTEST(response.message);
+
+                            for (int j = 0; j < responceFromGIBDD.Count; j++)
                             {
-                                responceFromGIBDD["SeriesAndNumber"],
-                                responceFromGIBDD["Birthday"],
-                                responceFromGIBDD["IssuedDate"],
-                                responceFromGIBDD["EndDate"],
-                                responceFromGIBDD["Category"],
-                                responceFromGIBDD["Comment"],
-                                responceFromGIBDD["CategoryCE"],
-                                responceFromGIBDD["stateDescription1"],
-                                responceFromGIBDD["comment1"],
-                                responceFromGIBDD["limitation1"],
-                                responceFromGIBDD["date1"],
-                                responceFromGIBDD["stateDescription2"],
-                                responceFromGIBDD["comment2"],
-                                responceFromGIBDD["limitation2"],
-                                responceFromGIBDD["date2"]
-                            };
-                            allData.Add(rowValues);
+                                worksheet.Cells[i + 1, j + 1 + colCount].Value = responceFromGIBDD.ElementAt(j).Value;
+                            }
                         }
                         else
                         {
-                            string errorMessage = "";
-                            try
+                            for (int k = 0; k < headers.Length; k++)
                             {
-                                var responseError = await response.Content.ReadAsStringAsync();
-                                var jsonResponseError = JsonDocument.Parse(responseError);
-
-                                errorMessage = jsonResponseError.RootElement
-                                    .GetProperty("event")
-                                    .GetProperty("name")
-                                    .GetString();
+                                worksheet.Cells[i + 1, k + 1 + colCount].Value = response.message;
                             }
-                            catch (Exception)
-                            {
-                                errorMessage = "Ошибка получения данных";
-                            }
-
-                            // Если ошибка – заполняем строку сообщением об ошибке
-                            object[] errorRow = new object[headers.Length];
-                            for (int k = 0; k < headers.Length; k++) errorRow[k] = errorMessage;
-                            allData.Add(errorRow);
                         }
                     }
-                }
-
-                // Пакетная запись
-                if (allData.Count > 0)
-                    worksheet.Cells[2, colCount + 1].LoadFromArrays(allData);
-
+                }                    
                 // Сохраняем изменения в файл
                 package.Save();
 

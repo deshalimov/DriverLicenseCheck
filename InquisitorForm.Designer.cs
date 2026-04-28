@@ -73,6 +73,7 @@
             this.buttonGIBDD = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.forcedVerificationCheckBox = new System.Windows.Forms.CheckBox();
             this.forcedVerificationDate = new System.Windows.Forms.NumericUpDown();
             this.label17 = new System.Windows.Forms.Label();
             this.checkBoxUpdateInfo = new System.Windows.Forms.CheckBox();
@@ -83,7 +84,6 @@
             this.labelErrorPath = new System.Windows.Forms.Label();
             this.textBoxPath = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
-            this.forcedVerificationCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -559,6 +559,18 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Проверка из файла";
             // 
+            // forcedVerificationCheckBox
+            // 
+            this.forcedVerificationCheckBox.AutoSize = true;
+            this.forcedVerificationCheckBox.Checked = true;
+            this.forcedVerificationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.forcedVerificationCheckBox.Location = new System.Drawing.Point(19, 549);
+            this.forcedVerificationCheckBox.Name = "forcedVerificationCheckBox";
+            this.forcedVerificationCheckBox.Size = new System.Drawing.Size(372, 20);
+            this.forcedVerificationCheckBox.TabIndex = 31;
+            this.forcedVerificationCheckBox.Text = "Обновить, если дата последнего обновления  более";
+            this.forcedVerificationCheckBox.UseVisualStyleBackColor = true;
+            // 
             // forcedVerificationDate
             // 
             this.forcedVerificationDate.Location = new System.Drawing.Point(408, 547);
@@ -663,18 +675,6 @@
             this.label15.TabIndex = 21;
             this.label15.Text = "                            ";
             // 
-            // forcedVerificationCheckBox
-            // 
-            this.forcedVerificationCheckBox.AutoSize = true;
-            this.forcedVerificationCheckBox.Checked = true;
-            this.forcedVerificationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.forcedVerificationCheckBox.Location = new System.Drawing.Point(19, 549);
-            this.forcedVerificationCheckBox.Name = "forcedVerificationCheckBox";
-            this.forcedVerificationCheckBox.Size = new System.Drawing.Size(372, 20);
-            this.forcedVerificationCheckBox.TabIndex = 31;
-            this.forcedVerificationCheckBox.Text = "Обновить, если дата последнего обновления  более";
-            this.forcedVerificationCheckBox.UseVisualStyleBackColor = true;
-            // 
             // InquisitorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -690,7 +690,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "InquisitorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Inquisitor 2.0";
+            this.Text = "Inquisitor 2.1";
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
