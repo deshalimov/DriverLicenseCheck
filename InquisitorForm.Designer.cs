@@ -609,9 +609,9 @@
             this.label14.ForeColor = System.Drawing.SystemColors.ControlLight;
             this.label14.Location = new System.Drawing.Point(244, 626);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(227, 16);
+            this.label14.Size = new System.Drawing.Size(236, 16);
             this.label14.TabIndex = 23;
-            this.label14.Text = "Developed by OVEP for Smartseeds";
+            this.label14.Text = "Developed by POVEP for Smartseeds";
             // 
             // textBoxOutputInfo
             // 
@@ -690,7 +690,8 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "InquisitorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Inquisitor 2.1";
+            this.Text = "Inquisitor 2.2";
+            this.Load += new System.EventHandler(this.InquisitorForm_Load);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);

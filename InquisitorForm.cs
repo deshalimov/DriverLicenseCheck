@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -12,13 +14,16 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
 
 namespace DriverLicenseCheck
 {
     public partial class InquisitorForm : Form
     {
+        private static readonly string enviroment = "";
+        private static readonly string _login = "";
+        private static readonly string _password = "";
+
+
 
 
         // таймаут получения данных
@@ -129,7 +134,75 @@ namespace DriverLicenseCheck
         // Функция отправки отчета в Spectrum
         public static async Task<(int, string)> CreateReportTestDEPRECATED(string driver_license, string driver_license_date, bool force)
         {
-            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make"; 
+            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make";
+
+            // Создаем объект запроса
+            var requestData = new
+            {
+                queryType = "MULTIPART",
+                query = " ",
+                data = new
+                {
+                    driver_license,
+                    driver_license_date
+                },
+                options = new
+                {
+                    FORCE = force
+                }
+            };
+
+            // Сериализация объекта запроса в JSON
+            string jsonRequest = JsonSerializer.Serialize(requestData);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            // Установка заголовков
+            _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
+
+            // отправка запроса
+            var response = await _httpClient.PostAsync(url, content);
+
+            if (response.StatusCode.ToString() == "OK")
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                // Десериализация JSON-ответа
+                var jsonResponse = JsonDocument.Parse(responseBody);
+
+                // Получаем значение uid из data
+                string uid = jsonResponse.RootElement
+                    .GetProperty("data")[0]
+                    .GetProperty("uid")
+                    .GetString();
+
+                return ((int)response.StatusCode, uid);
+            }
+            else
+            {
+                string errorMessage;
+                try
+                {
+                    string responseError = await response.Content.ReadAsStringAsync();
+                    var jsonResponseError = JsonDocument.Parse(responseError);
+
+                    errorMessage = jsonResponseError.RootElement
+                        .GetProperty("event")
+                        .GetProperty("name")
+                        .GetString();
+                }
+                catch (Exception)
+                {
+                    errorMessage = "Ошибка получения данных";
+                }
+                return ((int)response.StatusCode, errorMessage);
+            }
+        }
+
+        /*
+        // Функция отправки отчета в Spectrum
+        public static async Task<HttpResponseMessage> CreateReportTest(string driver_license, string driver_license_date, bool force)
+        {
+            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make";
 
             // Создаем объект запроса
             var requestData = new
@@ -156,46 +229,12 @@ namespace DriverLicenseCheck
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
 
             // отправка запроса
-            var response = await _httpClient.PostAsync(url, content);
-
-            if (response.StatusCode.ToString() == "OK")
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                // Десериализация JSON-ответа
-                var jsonResponse = JsonDocument.Parse(responseBody);
-
-                // Получаем значение uid из data
-                var uid = jsonResponse.RootElement
-                    .GetProperty("data")[0]
-                    .GetProperty("uid")
-                    .GetString();
-
-                return ((int)response.StatusCode, uid);
-            }
-            else
-            {
-                string errorMessage;
-                try
-                {
-                    var responseError = await response.Content.ReadAsStringAsync();
-                    var jsonResponseError = JsonDocument.Parse(responseError);
-
-                    errorMessage = jsonResponseError.RootElement
-                        .GetProperty("event")
-                        .GetProperty("name")
-                        .GetString();
-                }
-                catch (Exception)
-                {
-                    errorMessage = "Ошибка получения данных";
-                }
-                return ((int)response.StatusCode, errorMessage);
-            }
-        }
+            return await _httpClient.PostAsync(url, content);
+        }*/
 
 
         // Функция получения отчета из Spectrum
-        public async Task <Dictionary<string, string>> GetInformationTEST(string uid)
+        public async Task<Dictionary<string, string>> GetInformationTEST(string uid)
         {
             // Создать словарь данных
             Dictionary<string, string> data_from_GIBDD = new Dictionary<string, string>()
@@ -229,7 +268,7 @@ namespace DriverLicenseCheck
 
             if (response.StatusCode.ToString() == "OK")
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
+                string responseBody = await response.Content.ReadAsStringAsync();
 
                 // Десериализация JSON-ответа
                 var jsonResponse = JsonDocument.Parse(responseBody);
@@ -261,7 +300,7 @@ namespace DriverLicenseCheck
                     string categoriesJSON = data_driver.GetProperty("categories").ToString();
                     string[] categories = JsonSerializer.Deserialize<string[]>(categoriesJSON);
                     string res = "";
-                    foreach (var item in categories)
+                    foreach (string item in categories)
                     {
                         res += item + " ";
                     }
@@ -329,7 +368,7 @@ namespace DriverLicenseCheck
                     // Если отчет по ВУ старого образца
                     try
                     {
-                        var data_driver = jsonResponse.RootElement
+                        string data_driver = jsonResponse.RootElement
                             .GetProperty("data")[0]
                             .GetProperty("content")
                             .GetProperty("check_person")
@@ -345,7 +384,7 @@ namespace DriverLicenseCheck
                         foreach (var item in categoriesArray)
                         {
                             // Проверяем, есть ли ключ "category" и добавляем его значение
-                            if (item.TryGetValue("category", out var categoryValue))
+                            if (item.TryGetValue("category", out object categoryValue))
                             {
                                 categoryValues.Add(categoryValue.ToString());
                             }
@@ -356,14 +395,14 @@ namespace DriverLicenseCheck
 
                         string res_cat = "";
                         // Вывод значений категорий
-                        foreach (var category in categoryNames)
+                        foreach (string category in categoryNames)
                         {
                             res_cat += category + " ";
                         }
                         // если 
                         if (res_cat == "")
                         {
-                            var status_spec = jsonResponse.RootElement
+                            string status_spec = jsonResponse.RootElement
                             .GetProperty("data")[0]
                             .GetProperty("content")
                             .GetProperty("check_person")
@@ -539,8 +578,8 @@ namespace DriverLicenseCheck
 
                         for (int i = 1; i < rowCount; i++)
                         {
-                            var licence_plate_value = worksheet.Cells[i + 1, 11].Value;
-                            var issue_date_licence_plate_value = worksheet.Cells[i + 1, 12].Value;
+                            object licence_plate_value = worksheet.Cells[i + 1, 11].Value;
+                            object issue_date_licence_plate_value = worksheet.Cells[i + 1, 12].Value;
 
                             if (licence_plate_value != null && issue_date_licence_plate_value != null)
                             {
@@ -549,7 +588,28 @@ namespace DriverLicenseCheck
 
                                 ////////////////
                                 // СОЗДАТЬ ОТЧЕТ
+
                                 await CreateReportTestDEPRECATED(licence_plate_value.ToString(), issue_date_licence_plate, checkBoxUpdateInfo.Checked);
+
+                                /* // проверка прошло ли 14 дней
+                                var response = await CreateReportTest(licence_plate_value.ToString(), issue_date_licence_plate, checkBoxUpdateInfo.Checked);
+
+                                if (!checkBoxUpdateInfo.Checked && forcedVerificationCheckBox.Checked)
+                                {
+                                    try
+                                    {
+                                        // получить дату последнего обновления
+                                        var json = await response.Content.ReadAsStringAsync();
+                                        var date = JsonDocument.Parse(json).RootElement.GetProperty("data")[0].GetProperty("suggest_get").ToString();
+
+                                        // если с последней даты обновления прошло N дней
+                                        if ((DateTime.UtcNow - DateTime.Parse(date).ToUniversalTime()).Days > int.Parse(forcedVerificationDate.Text))
+                                            // отправить принудительно на проверку
+                                            await CreateReportTest(licence_plate_value.ToString(), issue_date_licence_plate, true);
+                                    }
+                                    catch (Exception) { }
+                                }*/
+
                             }
                         }
                         // Создаем новый поток на получение времени                       
@@ -572,7 +632,7 @@ namespace DriverLicenseCheck
             await GetQuotesUsed();
         }
 
-        async Task StartAfterDelay()
+        private async Task StartAfterDelay()
         {
             // Добавляем отступ в блоке вывода
             textBoxOutputInfo.Invoke(new Action(() => textBoxOutputInfo.AppendText(Environment.NewLine)));
@@ -625,8 +685,8 @@ namespace DriverLicenseCheck
                 for (int i = 1; i < rowCount; i++)
                 {
                     // Получить номер ВУ и дату выдачи
-                    var licence_plate_value = worksheet.Cells[i + 1, 11].Value;
-                    var issue_date_licence_plate_value = worksheet.Cells[i + 1, 12].Value;
+                    object licence_plate_value = worksheet.Cells[i + 1, 11].Value;
+                    object issue_date_licence_plate_value = worksheet.Cells[i + 1, 12].Value;
 
                     if (licence_plate_value != null && issue_date_licence_plate_value != null)
                     {
@@ -654,7 +714,65 @@ namespace DriverLicenseCheck
                             }
                         }
                     }
-                }                    
+                }
+                /*if (response.StatusCode == 200) // new
+                {
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    string message = JsonDocument.Parse(jsonResponse).RootElement.GetProperty("data")[0].GetProperty("uid").GetString();
+                    // Получить данные из отчета
+                    Dictionary<string, string> responceFromGIBDD = await GetInformationTEST(message);
+                    /////
+                    // Формируем массив значений в нужном порядке
+                    object[] rowValues = new object[]
+                    {
+                        responceFromGIBDD["SeriesAndNumber"],
+                        responceFromGIBDD["Birthday"],
+                        responceFromGIBDD["IssuedDate"],
+                        responceFromGIBDD["EndDate"],
+                        responceFromGIBDD["Category"],
+                        responceFromGIBDD["Comment"],
+                        responceFromGIBDD["CategoryCE"],
+                        responceFromGIBDD["stateDescription1"],
+                        responceFromGIBDD["comment1"],
+                        responceFromGIBDD["limitation1"],
+                        responceFromGIBDD["date1"],
+                        responceFromGIBDD["stateDescription2"],
+                        responceFromGIBDD["comment2"],
+                        responceFromGIBDD["limitation2"],
+                        responceFromGIBDD["date2"]
+                    };
+                    allData.Add(rowValues);
+                }
+                else
+                {
+                    string errorMessage = "";
+                    try
+                    {
+                        var responseError = await response.Content.ReadAsStringAsync();
+                        var jsonResponseError = JsonDocument.Parse(responseError);
+
+                        errorMessage = jsonResponseError.RootElement
+                            .GetProperty("event")
+                            .GetProperty("name")
+                            .GetString();
+                    }
+                    catch (Exception)
+                    {
+                        errorMessage = "Ошибка получения данных";
+                    }
+
+                    // Если ошибка – заполняем строку сообщением об ошибке
+                    object[] errorRow = new object[headers.Length];
+                    for (int k = 0; k < headers.Length; k++) errorRow[k] = errorMessage;
+                    allData.Add(errorRow);
+                }
+            }
+        }
+
+        // Пакетная запись
+        if (allData.Count > 0)
+            worksheet.Cells[2, colCount + 1].LoadFromArrays(allData);
+        */
                 // Сохраняем изменения в файл
                 package.Save();
 
@@ -666,7 +784,7 @@ namespace DriverLicenseCheck
         }
 
         // Покрасить в цвет
-        static void ChangeRowColorBySearchData(string excelFilePath)
+        private static void ChangeRowColorBySearchData(string excelFilePath)
         {
             string[] searchData = { "лишение", "не действителен", "Категория CE не открыта" };
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -689,7 +807,7 @@ namespace DriverLicenseCheck
                     for (int col = 1; col <= colCount; col++)
                     {
                         // Получаем значение ячейки
-                        var cellValue = worksheet.Cells[row, col].Text;
+                        string cellValue = worksheet.Cells[row, col].Text;
 
                         // Проверяем, содержится ли значение из массива в ячейке
                         if (searchData.Any(data => cellValue.IndexOf(data, StringComparison.OrdinalIgnoreCase) >= 0))
@@ -804,9 +922,9 @@ namespace DriverLicenseCheck
         // Функция генерация токена
         public static string GenerateToken(int age = 60 * 60 * 24)
         {
-            string user = _login; 
+            string user = _login;
             string password = _password;
-            var timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            int timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             string passwordHash = Convert.ToBase64String(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(password)));
 
@@ -819,7 +937,7 @@ namespace DriverLicenseCheck
             return tokenB64;
         }
 
-        async Task GetQuotesUsed()
+        private async Task GetQuotesUsed()
         {
             string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/balance/{enviroment}";
 
@@ -830,13 +948,13 @@ namespace DriverLicenseCheck
             // отправка запроса
             var response = await _httpClient.GetAsync(url);
 
-            var json = await response.Content.ReadAsStringAsync();
+            string json = await response.Content.ReadAsStringAsync();
             var resdata = JsonDocument.Parse(json).RootElement.GetProperty("data");
             string day = resdata[0].GetProperty("quote_use").ToString();
             string mounth = resdata[1].GetProperty("quote_use").ToString();
             string alltime = resdata[2].GetProperty("quote_use").ToString();
 
-            label15.Text = $"Использовано {mounth} квот за месяц, {day} за сегодня.";
+            label15.Text = $"Использовано {mounth} квот за месяц, {day} за сегодня, {alltime} за все время.";
         }
 
         private void DriverLicenseKeyPress(object sender, KeyPressEventArgs e)
@@ -845,6 +963,11 @@ namespace DriverLicenseCheck
             {
                 e.Handled = true;
             }
+        }
+
+        private void InquisitorForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
