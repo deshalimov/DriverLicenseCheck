@@ -19,9 +19,21 @@ namespace DriverLicenseCheck
 {
     public partial class InquisitorForm : Form
     {
-        private static readonly string enviroment = "";
-        private static readonly string _login = "";
-        private static readonly string _password = "";
+        private static readonly JsonElement secrets = JsonDocument.Parse(
+            File.ReadAllText("secrets.json")).RootElement;
+
+        private static readonly string _login =
+            secrets.GetProperty("_login").GetString();
+
+        private static readonly string _password =
+            secrets.GetProperty("_password").GetString();
+
+        private static readonly string prod =
+            secrets.GetProperty(
+                secrets.GetProperty("Prod").GetString()
+            ).GetString();
+
+        private static readonly string enviroment = prod;
 
 
 
@@ -154,20 +166,20 @@ namespace DriverLicenseCheck
 
             // Сериализация объекта запроса в JSON
             string jsonRequest = JsonSerializer.Serialize(requestData);
-            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
             // Установка заголовков
             _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
 
             // отправка запроса
-            var response = await _httpClient.PostAsync(url, content);
+            HttpResponseMessage response = await _httpClient.PostAsync(url, content);
 
             if (response.StatusCode.ToString() == "OK")
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
                 // Десериализация JSON-ответа
-                var jsonResponse = JsonDocument.Parse(responseBody);
+                JsonDocument jsonResponse = JsonDocument.Parse(responseBody);
 
                 // Получаем значение uid из data
                 string uid = jsonResponse.RootElement
@@ -183,7 +195,7 @@ namespace DriverLicenseCheck
                 try
                 {
                     string responseError = await response.Content.ReadAsStringAsync();
-                    var jsonResponseError = JsonDocument.Parse(responseError);
+                    JsonDocument jsonResponseError = JsonDocument.Parse(responseError);
 
                     errorMessage = jsonResponseError.RootElement
                         .GetProperty("event")
@@ -264,19 +276,19 @@ namespace DriverLicenseCheck
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
 
             // Отправляем GET запрос
-            var response = await _httpClient.GetAsync(url);
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
 
             if (response.StatusCode.ToString() == "OK")
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 // Десериализация JSON-ответа
-                var jsonResponse = JsonDocument.Parse(responseBody);
+                JsonDocument jsonResponse = JsonDocument.Parse(responseBody);
 
                 // Если отчет по ВУ нового образца cp_driver_license_v2
                 try
                 {
-                    var data_driver = jsonResponse.RootElement
+                    JsonElement data_driver = jsonResponse.RootElement
                         .GetProperty("data")[0]
                         .GetProperty("content")
                         .GetProperty("check_person")
@@ -324,7 +336,7 @@ namespace DriverLicenseCheck
                     // Получить данные по лишениям
                     try
                     {
-                        var decisions = data_driver.GetProperty("decisions");
+                        JsonElement decisions = data_driver.GetProperty("decisions");
 
                         if (decisions.GetArrayLength() != 0)
                         {
@@ -377,11 +389,11 @@ namespace DriverLicenseCheck
                             .GetProperty("category_info_list")
                             .ToString().Replace('\'', '\"');
 
-                        var categoriesArray = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(data_driver);
+                        List<Dictionary<string, object>> categoriesArray = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(data_driver);
 
                         // Извлечение значений "category"
                         List<string> categoryValues = new List<string>();
-                        foreach (var item in categoriesArray)
+                        foreach (Dictionary<string, object> item in categoriesArray)
                         {
                             // Проверяем, есть ли ключ "category" и добавляем его значение
                             if (item.TryGetValue("category", out object categoryValue))
@@ -419,7 +431,7 @@ namespace DriverLicenseCheck
                         // Наличие категории CE
                         data_from_GIBDD["CategoryCE"] = (categoryNames.Contains("CE") || categoryNames.Contains("СЕ")) ? "Категория CE открыта" : "Категория CE не открыта";
 
-                        var data_driver_lp = jsonResponse.RootElement
+                        JsonElement data_driver_lp = jsonResponse.RootElement
                             .GetProperty("data")[0]
                             .GetProperty("query")
                             .GetProperty("data");
@@ -435,7 +447,7 @@ namespace DriverLicenseCheck
                         data_from_GIBDD["Comment"] = "Нет данных";
 
                         // Получить данные по лишениям
-                        var decisions = jsonResponse.RootElement
+                        JsonElement decisions = jsonResponse.RootElement
                         .GetProperty("data")[0]
                         .GetProperty("content")
                         .GetProperty("check_person")
@@ -496,7 +508,7 @@ namespace DriverLicenseCheck
                     {
                         try
                         {
-                            var data_driver_lp = jsonResponse.RootElement
+                            JsonElement data_driver_lp = jsonResponse.RootElement
                                .GetProperty("data")[0]
                                .GetProperty("query")
                                .GetProperty("data");
@@ -680,7 +692,7 @@ namespace DriverLicenseCheck
                     worksheet.Cells[1, colCount + i + 1].Value = headers[i];
 
                 // Список для пакетной записи
-                var allData = new List<object[]>();
+                List<object[]> allData = new List<object[]>();
 
                 for (int i = 1; i < rowCount; i++)
                 {
@@ -813,7 +825,7 @@ namespace DriverLicenseCheck
                         if (searchData.Any(data => cellValue.IndexOf(data, StringComparison.OrdinalIgnoreCase) >= 0))
                         {
                             // Если да, окрашиваем строку в красный цвет
-                            using (var range = worksheet.Cells[row, 1, row, colCount])
+                            using (ExcelRange range = worksheet.Cells[row, 1, row, colCount])
                             {
                                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                                 range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Red);
@@ -946,10 +958,10 @@ namespace DriverLicenseCheck
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 99999));
 
             // отправка запроса
-            var response = await _httpClient.GetAsync(url);
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
 
             string json = await response.Content.ReadAsStringAsync();
-            var resdata = JsonDocument.Parse(json).RootElement.GetProperty("data");
+            JsonElement resdata = JsonDocument.Parse(json).RootElement.GetProperty("data");
             string day = resdata[0].GetProperty("quote_use").ToString();
             string mounth = resdata[1].GetProperty("quote_use").ToString();
             string alltime = resdata[2].GetProperty("quote_use").ToString();
