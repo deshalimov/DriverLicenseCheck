@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -19,28 +17,8 @@ namespace DriverLicenseCheck
 {
     public partial class InquisitorForm : Form
     {
-        private static readonly JsonElement secrets = JsonDocument.Parse(
-            File.ReadAllText("secrets.json")).RootElement;
-
-        private static readonly string _login =
-            secrets.GetProperty("_login").GetString();
-
-        private static readonly string _password =
-            secrets.GetProperty("_password").GetString();
-
-        private static readonly string prod =
-            secrets.GetProperty(
-                secrets.GetProperty("Prod").GetString()
-            ).GetString();
-
-        private static readonly string enviroment = prod;
-
-
-
-
         // таймаут получения данных
         private const int timeout = 90000;
-        private static readonly HttpClient _httpClient = new HttpClient();
         public InquisitorForm()
         {
             InitializeComponent();
@@ -140,420 +118,6 @@ namespace DriverLicenseCheck
             else
             {
                 MessageBox.Show("Ошибка. Код ошибки: " + response.code + ". " + response.message, "Ошибка создания отчета", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // Функция отправки отчета в Spectrum
-        public static async Task<(int, string)> CreateReportTestDEPRECATED(string driver_license, string driver_license_date, bool force)
-        {
-            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make";
-
-            // Создаем объект запроса
-            var requestData = new
-            {
-                queryType = "MULTIPART",
-                query = " ",
-                data = new
-                {
-                    driver_license,
-                    driver_license_date
-                },
-                options = new
-                {
-                    FORCE = force
-                }
-            };
-
-            // Сериализация объекта запроса в JSON
-            string jsonRequest = JsonSerializer.Serialize(requestData);
-            StringContent content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-            // Установка заголовков
-            _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
-
-            // отправка запроса
-            HttpResponseMessage response = await _httpClient.PostAsync(url, content);
-
-            if (response.StatusCode.ToString() == "OK")
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                // Десериализация JSON-ответа
-                JsonDocument jsonResponse = JsonDocument.Parse(responseBody);
-
-                // Получаем значение uid из data
-                string uid = jsonResponse.RootElement
-                    .GetProperty("data")[0]
-                    .GetProperty("uid")
-                    .GetString();
-
-                return ((int)response.StatusCode, uid);
-            }
-            else
-            {
-                string errorMessage;
-                try
-                {
-                    string responseError = await response.Content.ReadAsStringAsync();
-                    JsonDocument jsonResponseError = JsonDocument.Parse(responseError);
-
-                    errorMessage = jsonResponseError.RootElement
-                        .GetProperty("event")
-                        .GetProperty("name")
-                        .GetString();
-                }
-                catch (Exception)
-                {
-                    errorMessage = "Ошибка получения данных";
-                }
-                return ((int)response.StatusCode, errorMessage);
-            }
-        }
-
-        /*
-        // Функция отправки отчета в Spectrum
-        public static async Task<HttpResponseMessage> CreateReportTest(string driver_license, string driver_license_date, bool force)
-        {
-            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{enviroment}/_make";
-
-            // Создаем объект запроса
-            var requestData = new
-            {
-                queryType = "MULTIPART",
-                query = " ",
-                data = new
-                {
-                    driver_license,
-                    driver_license_date
-                },
-                options = new
-                {
-                    FORCE = force
-                }
-            };
-
-            // Сериализация объекта запроса в JSON
-            var jsonRequest = JsonSerializer.Serialize(requestData);
-            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-            // Установка заголовков
-            _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
-
-            // отправка запроса
-            return await _httpClient.PostAsync(url, content);
-        }*/
-
-
-        // Функция получения отчета из Spectrum
-        public async Task<Dictionary<string, string>> GetInformationTEST(string uid)
-        {
-            // Создать словарь данных
-            Dictionary<string, string> data_from_GIBDD = new Dictionary<string, string>()
-            {
-                {"SeriesAndNumber", ""},
-                {"Birthday", ""},
-                {"IssuedDate", ""},
-                {"EndDate", ""},
-                {"Category", ""},
-                {"Comment", ""},
-                {"CategoryCE", ""},
-                {"stateDescription1", ""},
-                {"comment1", ""},
-                {"limitation1", ""},
-                {"date1", ""},
-                {"stateDescription2", ""},
-                {"comment2", ""},
-                {"limitation2", ""},
-                {"date2", ""}
-            };
-
-            // Сгенерить URL адрес
-            string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/reports/{uid}?_content=true&_detailed=false";
-
-            // Установка заголовков
-            _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 999999999));
-
-            // Отправляем GET запрос
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-
-            if (response.StatusCode.ToString() == "OK")
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-
-                // Десериализация JSON-ответа
-                JsonDocument jsonResponse = JsonDocument.Parse(responseBody);
-
-                // Если отчет по ВУ нового образца cp_driver_license_v2
-                try
-                {
-                    JsonElement data_driver = jsonResponse.RootElement
-                        .GetProperty("data")[0]
-                        .GetProperty("content")
-                        .GetProperty("check_person")
-                        .GetProperty("cp_driver_license_v2")
-                        .GetProperty("driverLicense");
-
-                    // Серия и номер ВУ
-                    data_from_GIBDD["SeriesAndNumber"] = data_driver.GetProperty("series").ToString()
-                        + data_driver.GetProperty("number").ToString();
-
-                    // Дата рождения водителя
-                    data_from_GIBDD["Birthday"] = FormatDate(data_driver.GetProperty("birthday").ToString());
-
-                    // Дата выдачи ВУ
-                    data_from_GIBDD["IssuedDate"] = FormatDate(data_driver.GetProperty("receivingDate").ToString());
-
-                    // Дата окончания ВУ
-                    data_from_GIBDD["EndDate"] = FormatDate(data_driver.GetProperty("endDate").ToString());
-
-                    // Открытые категории ВУ
-                    string categoriesJSON = data_driver.GetProperty("categories").ToString();
-                    string[] categories = JsonSerializer.Deserialize<string[]>(categoriesJSON);
-                    string res = "";
-                    foreach (string item in categories)
-                    {
-                        res += item + " ";
-                    }
-                    data_from_GIBDD["Category"] = res;
-
-                    // Наличие категории CE
-                    if (categories.Contains("CE") || categories.Contains("СЕ"))
-                    {
-                        data_from_GIBDD["CategoryCE"] = "Категория CE открыта";
-                    }
-                    else
-                    {
-                        data_from_GIBDD["CategoryCE"] = "Категория CE не открыта";
-                    }
-
-                    // Комментарий ГИБДД
-                    data_from_GIBDD["Comment"] = (data_driver.GetProperty("gibddDataFoundComment").ToString() == "")
-                        ? data_driver.GetProperty("deprivationOfManagementRightsComment").ToString()
-                        : data_driver.GetProperty("gibddDataFoundComment").ToString();
-
-                    // Получить данные по лишениям
-                    try
-                    {
-                        JsonElement decisions = data_driver.GetProperty("decisions");
-
-                        if (decisions.GetArrayLength() != 0)
-                        {
-                            try
-                            {
-                                data_from_GIBDD["stateDescription1"] = decisions[0].GetProperty("stateDescription").ToString();
-                                data_from_GIBDD["comment1"] = decisions[0].GetProperty("comment").ToString();
-                                data_from_GIBDD["limitation1"] = decisions[0].GetProperty("limitation").ToString();
-                                data_from_GIBDD["date1"] = FormatDate(decisions[0].GetProperty("date").ToString());
-                            }
-                            catch { }
-
-                            try
-                            {
-                                data_from_GIBDD["stateDescription2"] = decisions[1].GetProperty("stateDescription").ToString();
-                                data_from_GIBDD["comment2"] = decisions[1].GetProperty("comment").ToString();
-                                data_from_GIBDD["limitation2"] = decisions[1].GetProperty("limitation").ToString();
-                                data_from_GIBDD["date2"] = FormatDate(decisions[1].GetProperty("date").ToString());
-                            }
-                            catch { }
-                        }
-                        else
-                        {
-                            data_from_GIBDD["stateDescription1"] = "Нет данных";
-                            data_from_GIBDD["comment1"] = "Нет данных";
-                            data_from_GIBDD["limitation1"] = "Нет данных";
-                            data_from_GIBDD["date1"] = "Нет данных";
-                            data_from_GIBDD["stateDescription2"] = "Нет данных";
-                            data_from_GIBDD["comment2"] = "Нет данных";
-                            data_from_GIBDD["limitation2"] = "Нет данных";
-                            data_from_GIBDD["date2"] = "Нет данных";
-                        }
-                    }
-                    catch { }
-
-                    return data_from_GIBDD;
-                }
-                // Если при получения отчета нового образца возникли ошибки
-                catch
-                {
-                    // Если отчет по ВУ старого образца
-                    try
-                    {
-                        string data_driver = jsonResponse.RootElement
-                            .GetProperty("data")[0]
-                            .GetProperty("content")
-                            .GetProperty("check_person")
-                            .GetProperty("piter_driver_license")
-                            .GetProperty("category_info")
-                            .GetProperty("category_info_list")
-                            .ToString().Replace('\'', '\"');
-
-                        List<Dictionary<string, object>> categoriesArray = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(data_driver);
-
-                        // Извлечение значений "category"
-                        List<string> categoryValues = new List<string>();
-                        foreach (Dictionary<string, object> item in categoriesArray)
-                        {
-                            // Проверяем, есть ли ключ "category" и добавляем его значение
-                            if (item.TryGetValue("category", out object categoryValue))
-                            {
-                                categoryValues.Add(categoryValue.ToString());
-                            }
-                        }
-
-                        // Преобразование в массив string[]
-                        string[] categoryNames = categoryValues.ToArray();
-
-                        string res_cat = "";
-                        // Вывод значений категорий
-                        foreach (string category in categoryNames)
-                        {
-                            res_cat += category + " ";
-                        }
-                        // если 
-                        if (res_cat == "")
-                        {
-                            string status_spec = jsonResponse.RootElement
-                            .GetProperty("data")[0]
-                            .GetProperty("content")
-                            .GetProperty("check_person")
-                            .GetProperty("piter_driver_license")
-                            .GetProperty("status")
-                            .ToString();
-                            data_from_GIBDD["Category"] = status_spec;
-                        }
-                        else
-                        {
-                            data_from_GIBDD["Category"] = res_cat;
-                        }
-
-                        // Наличие категории CE
-                        data_from_GIBDD["CategoryCE"] = (categoryNames.Contains("CE") || categoryNames.Contains("СЕ")) ? "Категория CE открыта" : "Категория CE не открыта";
-
-                        JsonElement data_driver_lp = jsonResponse.RootElement
-                            .GetProperty("data")[0]
-                            .GetProperty("query")
-                            .GetProperty("data");
-
-                        // Серия и номер ВУ
-                        data_from_GIBDD["SeriesAndNumber"] = data_driver_lp.GetProperty("driver_license").ToString();
-
-                        // Дата выдачи ВУ
-                        data_from_GIBDD["IssuedDate"] = data_driver_lp.GetProperty("driver_license_date").ToString();
-
-                        data_from_GIBDD["Birthday"] = "Нет данных";
-                        data_from_GIBDD["EndDate"] = "Нет данных";
-                        data_from_GIBDD["Comment"] = "Нет данных";
-
-                        // Получить данные по лишениям
-                        JsonElement decisions = jsonResponse.RootElement
-                        .GetProperty("data")[0]
-                        .GetProperty("content")
-                        .GetProperty("check_person")
-                        .GetProperty("cp_driver_license_v2")
-                        .GetProperty("driverLicense")
-                        .GetProperty("decisions");
-
-                        try
-                        {
-                            if (decisions.GetArrayLength() != 0)
-                            {
-                                try
-                                {
-                                    data_from_GIBDD["stateDescription1"] = decisions[0].GetProperty("stateDescription").ToString();
-                                    data_from_GIBDD["comment1"] = decisions[0].GetProperty("comment").ToString();
-                                    data_from_GIBDD["limitation1"] = decisions[0].GetProperty("limitation").ToString();
-                                    data_from_GIBDD["date1"] = FormatDate(decisions[0].GetProperty("date").ToString());
-                                }
-                                catch { }
-
-                                try
-                                {
-                                    data_from_GIBDD["stateDescription2"] = decisions[1].GetProperty("stateDescription").ToString();
-                                    data_from_GIBDD["comment2"] = decisions[1].GetProperty("comment").ToString();
-                                    data_from_GIBDD["limitation2"] = decisions[1].GetProperty("limitation").ToString();
-                                    data_from_GIBDD["date2"] = FormatDate(decisions[1].GetProperty("date").ToString());
-                                }
-                                catch { }
-                            }
-                            else
-                            {
-                                data_from_GIBDD["stateDescription1"] = "Нет данных";
-                                data_from_GIBDD["comment1"] = "Нет данных";
-                                data_from_GIBDD["limitation1"] = "Нет данных";
-                                data_from_GIBDD["date1"] = "Нет данных";
-                                data_from_GIBDD["stateDescription2"] = "Нет данных";
-                                data_from_GIBDD["comment2"] = "Нет данных";
-                                data_from_GIBDD["limitation2"] = "Нет данных";
-                                data_from_GIBDD["date2"] = "Нет данных";
-                            }
-                        }
-                        catch
-                        {
-                            data_from_GIBDD["stateDescription1"] = "Данные не получены";
-                            data_from_GIBDD["comment1"] = "Данные не получены";
-                            data_from_GIBDD["limitation1"] = "Данные не получены";
-                            data_from_GIBDD["date1"] = "Данные не получены";
-                            data_from_GIBDD["stateDescription2"] = "Данные не получены";
-                            data_from_GIBDD["comment2"] = "Данные не получены";
-                            data_from_GIBDD["limitation2"] = "Данные не получены";
-                            data_from_GIBDD["date2"] = "Данные не получены";
-                        }
-
-                        return data_from_GIBDD;
-                    }
-                    // Если по отчету старого образца возникла ошибка
-                    catch
-                    {
-                        try
-                        {
-                            JsonElement data_driver_lp = jsonResponse.RootElement
-                               .GetProperty("data")[0]
-                               .GetProperty("query")
-                               .GetProperty("data");
-
-                            // Серия и номер ВУ
-                            data_from_GIBDD["SeriesAndNumber"] = data_driver_lp.GetProperty("driver_license").ToString();
-
-                            // Дата выдачи ВУ
-                            data_from_GIBDD["IssuedDate"] = data_driver_lp.GetProperty("driver_license_date").ToString();
-                        }
-                        catch
-                        {
-                            data_from_GIBDD["SeriesAndNumber"] = "Данные не получены";
-                            data_from_GIBDD["IssuedDate"] = "Данные не получены";
-                        }
-                        data_from_GIBDD["Category"] = "Данные не получены";
-                        data_from_GIBDD["Birthday"] = "Данные не получены";
-                        data_from_GIBDD["EndDate"] = "Данные не получены";
-                        data_from_GIBDD["Comment"] = "Данные не получены";
-                        data_from_GIBDD["CategoryCE"] = "Данные не получены";
-
-                        data_from_GIBDD["stateDescription1"] = "Данные не получены";
-                        data_from_GIBDD["comment1"] = "Данные не получены";
-                        data_from_GIBDD["limitation1"] = "Данные не получены";
-                        data_from_GIBDD["date1"] = "Данные не получены";
-                        data_from_GIBDD["stateDescription2"] = "Данные не получены";
-                        data_from_GIBDD["comment2"] = "Данные не получены";
-                        data_from_GIBDD["limitation2"] = "Данные не получены";
-                        data_from_GIBDD["date2"] = "Данные не получены";
-
-                        return data_from_GIBDD;
-                    }
-                }
-            }
-            else
-            {
-                data_from_GIBDD["Category"] = "Данные не получены";
-                data_from_GIBDD["SeriesAndNumber"] = "Данные не получены";
-                data_from_GIBDD["IssuedDate"] = "Данные не получены";
-                data_from_GIBDD["Birthday"] = "Данные не получены";
-                data_from_GIBDD["EndDate"] = "Данные не получены";
-                data_from_GIBDD["Comment"] = "Данные не получены";
-                data_from_GIBDD["CategoryCE"] = "Данные не получены";
-
-                return data_from_GIBDD;
             }
         }
 
@@ -825,7 +389,7 @@ namespace DriverLicenseCheck
                         if (searchData.Any(data => cellValue.IndexOf(data, StringComparison.OrdinalIgnoreCase) >= 0))
                         {
                             // Если да, окрашиваем строку в красный цвет
-                            using (ExcelRange range = worksheet.Cells[row, 1, row, colCount])
+                            using (var range = worksheet.Cells[row, 1, row, colCount])
                             {
                                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                                 range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Red);
@@ -841,14 +405,6 @@ namespace DriverLicenseCheck
                 // Сохраняем изменения в тот же файл
                 package.Save();
             }
-        }
-
-        // Функция форматирования даты
-        private string FormatDate(string dateString)
-        {
-            DateTime date = DateTime.Parse(dateString);
-            string formattedDate = date.ToString("dd.MM.yyyy");
-            return formattedDate;
         }
 
         // Таймер оставшегося времени
@@ -931,24 +487,6 @@ namespace DriverLicenseCheck
             }
         }
 
-        // Функция генерация токена
-        public static string GenerateToken(int age = 60 * 60 * 24)
-        {
-            string user = _login;
-            string password = _password;
-            int timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            string passwordHash = Convert.ToBase64String(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(password)));
-
-            string hashWithSalt = $"{timestamp}:{age}:{passwordHash}";
-            string saltedHashB64 = Convert.ToBase64String(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(hashWithSalt)));
-
-            string token = $"{user}:{timestamp}:{age}:{saltedHashB64}";
-            string tokenB64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
-
-            return tokenB64;
-        }
-
         private async Task GetQuotesUsed()
         {
             string url = $"https://b2b-api.spectrumdata.ru/b2b/api/v1/user/balance/{enviroment}";
@@ -958,10 +496,10 @@ namespace DriverLicenseCheck
             new AuthenticationHeaderValue("AR-REST", GenerateToken(age: 99999));
 
             // отправка запроса
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            var response = await _httpClient.GetAsync(url);
 
             string json = await response.Content.ReadAsStringAsync();
-            JsonElement resdata = JsonDocument.Parse(json).RootElement.GetProperty("data");
+            var resdata = JsonDocument.Parse(json).RootElement.GetProperty("data");
             string day = resdata[0].GetProperty("quote_use").ToString();
             string mounth = resdata[1].GetProperty("quote_use").ToString();
             string alltime = resdata[2].GetProperty("quote_use").ToString();
